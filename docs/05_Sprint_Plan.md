@@ -73,28 +73,22 @@ Phase 5 — Observability & Production    (Sprint 22-25)
 ### Sprint 02 — SSO Server Bootstrap & OAuth2 Foundation
 **Mục tiêu:** SSO Server khởi động, expose JWKS endpoint, cấu hình OAuth2 clients.
 
-**Tasks:**
-- `[ ]` Khởi tạo `sso-server` Spring Boot app với dependencies:
-  - `spring-security-oauth2-authorization-server`
-  - `spring-boot-starter-security`
-  - `spring-boot-starter-data-jpa`
-  - `spring-boot-starter-data-redis`
-  - `flyway-core`
-- `[ ]` Implement `AuthorizationServerConfig.java`:
+- `[x] Khởi tạo sso-server Spring Boot app với các dependencies chính`
+- `[x] Implement AuthorizationServerConfig.java:`
   - Đăng ký 2 OAuth2 clients: `monolith-web` và `microservice-gateway`
-  - Đăng ký 5 service clients (Client Credentials): `order-service`, `payment-service`, v.v.
-  - Cấu hình `RegisteredClientRepository` lưu vào PostgreSQL (không dùng InMemory)
+  - Đăng ký các service clients (Client Credentials): `order-service`, `payment-service`, v.v.
+  - Cấu hình `RegisteredClientRepository` lưu vào PostgreSQL (`OauthClient` entity + `JpaRegisteredClientRepository` custom mapper)
   - Token settings: access token TTL = 15 phút, refresh token TTL = 7 ngày
-- `[ ]` Implement RSA key pair generation và JWKS endpoint:
+- `[x] Implement RSA key pair generation và JWKS endpoint:`
   - Tạo `KeyPairConfig.java` generate RSA-2048 key pair
   - Expose `/.well-known/openid-configuration`
   - Expose `/oauth2/jwks`
-- `[ ]` Implement `JwtCustomizerConfig.java`:
+- `[x] Implement JwtCustomizerConfig.java:`
   - Thêm custom claims vào JWT: `roles`, `permissions`, `email`, `name`
-  - Load roles và permissions từ DB của user
-- `[ ]` Implement `CustomUserDetailsService.java`:
-  - Load user từ PostgreSQL
-  - Check `enabled` và `locked` status
+  - Load roles và permissions từ DB của user qua Principal
+- `[x] Implement CustomUserDetailsService.java:`
+  - Load user từ PostgreSQL qua `UserRepository`
+  - Check `enabled` và `locked` status thông qua `SsoUserDetails` bọc ngoài
 
 **API Contracts:**
 ```
