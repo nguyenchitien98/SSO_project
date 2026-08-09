@@ -168,9 +168,10 @@ GET  /oauth2/authorize                   → Authorization endpoint
 - `[ ]` Implement Social Login (Google / Microsoft OAuth2):
   - Cấu hình OAuth2 login client integration tại SSO Server
   - Account Linking: tự động map email từ Google/Microsoft ID Token sang local account
+- `[ ]` Custom giao diện (HTML/CSS templates) cho các trang Login, Consent, và 2FA Verification trên SSO Server để đồng bộ thương hiệu
 - `[ ]` Viết Integration Test dùng Testcontainers (PostgreSQL + Redis)
 
-**Definition of Done:** Login → lấy được token. Đăng nhập sai 5 lần → bị lock. Đổi refresh token → token cũ bị invalidate. Xác thực 2FA hoạt động chính xác.
+**Definition of Done:** Login → lấy được token. Đăng nhập sai 5 lần → bị lock. Đổi refresh token → token cũ bị invalidate. Xác thực 2FA hoạt động chính xác. Giao diện Login/2FA custom hiển thị đồng bộ.
 
 ---
 
@@ -222,8 +223,12 @@ GET  /oauth2/authorize                   → Authorization endpoint
   - `GET /api/users/me` — Lấy profile của chính mình
   - `PUT /api/users/me` — Cập nhật profile
 - `[ ]` Cấu hình CORS cho `http://localhost:3000` (Frontend dev server)
+- `[ ]` Khởi tạo dự án Next.js 15 Frontend (`sso-platform-ui`) sử dụng TypeScript và CSS Modules
+- `[ ]` Cấu hình **NextAuth.js v5** kết nối đăng nhập OAuth2 OIDC với SSO Server (:9000)
+- `[ ]` Thiết kế khung giao diện Dashboard Shell (Sidebar, Header, DashboardShell) có responsive
+- `[ ]` Xây dựng trang Landing/Login và Route Callback handler để nhận token từ SSO Server
 
-**Definition of Done:** `GET /api/users/me` với valid JWT → trả về user profile. Với invalid JWT → HTTP 401.
+**Definition of Done:** `GET /api/users/me` trả về profile thành công. Dự án Next.js khởi tạo chạy được, có thể đăng nhập/đăng xuất qua SSO Server và hiển thị trang Dashboard Shell trống.
 
 ---
 
@@ -253,8 +258,11 @@ GET  /oauth2/authorize                   → Authorization endpoint
   - STAFF gọi `createProduct` → thành công
   - USER gọi `deleteProduct` → `AccessDeniedException`
   - ADMIN gọi `deleteProduct` → thành công
+- `[ ]` Xây dựng trang Danh sách sản phẩm (Product List) và Chi tiết sản phẩm (Product Detail) hiển thị dữ liệu sử dụng React Server Components (RSC)
+- `[ ]` Triển khai client component `ProductForm` phục vụ việc Thêm/Sửa sản phẩm
+- `[ ]` Sử dụng Custom Hook `usePermission` để thực hiện conditional rendering ẩn/hiện nút Thêm/Sửa/Xóa tùy theo Roles & Permissions của user hiện tại
 
-**Definition of Done:** Tất cả unit test pass. Phân quyền đúng theo role.
+**Definition of Done:** Tất cả unit test backend pass. Giao diện xem danh sách và chi tiết sản phẩm hoạt động. Giao diện CRUD sản phẩm phân quyền chính xác theo permissions của user đăng nhập.
 
 ---
 
@@ -302,8 +310,10 @@ GET  /oauth2/authorize                   → Authorization endpoint
   public PaymentResponse processPayment(ProcessPaymentRequest req) { ... }
   ```
 - `[ ]` Viết Integration Test: test ownership violation → HTTP 403
+- `[ ]` Xây dựng giao diện Danh sách đơn hàng (Order List) và Chi tiết đơn hàng (Order Detail) hỗ trợ phân quyền sở hữu tài nguyên (Ownership check)
+- `[ ]` Xây dựng giao diện Checkout đơn hàng (chọn sản phẩm, nhập địa chỉ) và tích hợp trang thanh toán giả lập (Mock Sandbox Payment Page)
 
-**Definition of Done:** USER không thể xem đơn hàng của người khác. ADMIN có thể xem tất cả. Integration test pass.
+**Definition of Done:** USER không thể xem đơn hàng của người khác. ADMIN có thể xem tất cả. Integration test pass. Giao diện Đơn hàng và Checkout hoạt động đúng phân quyền.
 
 ---
 
@@ -335,8 +345,10 @@ GET  /oauth2/authorize                   → Authorization endpoint
   - Test JWT với wrong issuer → HTTP 401
   - Test JWT với wrong audience → HTTP 401
   - Test tampered JWT payload → HTTP 401
+- `[ ]` Xây dựng trang Quản trị Admin: Giao diện xem danh sách User, thay đổi trạng thái Active/Locked, và gán/thu hồi Roles
+- `[ ]` Xây dựng giao diện hiển thị Centralized Audit Logs lọc theo User, Action (chỉ cho phép ADMIN / AUDITOR truy cập)
 
-**Definition of Done:** Tất cả security tests pass. Audit logs được ghi đầy đủ.
+**Definition of Done:** Tất cả security tests pass. Audit logs được ghi đầy đủ. Trang quản lý User và xem Audit Log trên Frontend hoạt động đúng phân quyền.
 
 ---
 
@@ -352,8 +364,10 @@ GET  /oauth2/authorize                   → Authorization endpoint
   - Scenario 4 — Ownership violation: USER A → GET /orders/{orderId of User B} → 403
   - Scenario 5 — Brute force: 6 login attempts → account locked → 429
 - `[ ]` Load test nhỏ với k6: 100 concurrent users, 60 seconds → P99 < 500ms
+- `[ ]` Cài đặt và cấu hình thư viện kiểm thử giao diện E2E (Playwright hoặc Cypress) cho Next.js App
+- `[ ]` Viết luồng kiểm thử giao diện tự động (E2E Test) bao phủ luồng đi đầy đủ (Happy path E2E): Login -> Mua hàng -> Checkout -> Xem đơn hàng -> Đổi mật khẩu -> Logout
 
-**Definition of Done:** Tất cả Integration Test pass. Monolith app production-ready.
+**Definition of Done:** Tất cả Integration Test backend pass. E2E Test trên UI chạy thành công hoàn toàn không có lỗi hiển thị/chức năng. Monolith app & UI production-ready.
 
 ---
 
@@ -394,8 +408,10 @@ GET  /oauth2/authorize                   → Authorization endpoint
   /api/files/**     → file-service:8096
   ```
 - `[ ]` Implement Rate Limiting: 100 req/min/user (Redis Token Bucket)
+- `[ ]` Cấu hình môi trường Frontend chuyển hướng endpoint API từ Monolith sang API Gateway (:8090)
+- `[ ]` Cập nhật Base Fetch client để tự động đính kèm Access Token trong authorization header khi gọi các API qua Gateway
 
-**Definition of Done:** Request với valid JWT → Gateway inject headers → forward đến service. Invalid JWT → 401. Fake X-User headers từ client → bị strip.
+**Definition of Done:** Request với valid JWT → Gateway inject headers → forward đến service. Invalid JWT → 401. Fake X-User headers từ client → bị strip. Giao diện người dùng Next.js gọi thành công API qua cổng Gateway.
 
 ---
 
@@ -467,7 +483,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 }
 ```
 
-**Definition of Done:** API hoạt động đúng. USER gọi PRODUCT_CREATE → 403. STAFF gọi → 201. File Upload lên MinIO thành công, trả về URL truy cập được.
+- `[ ]` Xây dựng trang cá nhân (Profile Page) hiển thị thông tin và hỗ trợ chỉnh sửa thông tin người dùng
+- `[ ]` Triển khai API tích hợp tải ảnh lên (upload avatar) từ Frontend qua `file-service` lưu vào MinIO, tự động hiển thị ảnh đại diện mới trên Header
+- `[ ]` Thiết kế Modal Setup 2FA: Tạo nút Switch bật 2FA, hiển thị mã QR và trường nhập mã OTP 6 số để kích hoạt 2FA
+
+**Definition of Done:** API hoạt động đúng. USER gọi PRODUCT_CREATE → 403. STAFF gọi → 201. File Upload lên MinIO thành công, trả về URL truy cập được. Giao diện Profile hoạt động, có thể upload avatar và bật 2FA thông qua QR code thành công.
 
 ---
 
@@ -500,8 +520,9 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
   ```
 - `[ ]` `GET /api/orders` — USER thấy đơn của mình, ADMIN thấy tất cả
 - `[ ]` `POST /api/orders/{id}/cancel` — Chỉ owner hoặc ADMIN, chỉ khi status = PENDING
+- `[ ]` Nâng cấp giao diện Checkout để tự động tạo UUID `Idempotency-Key` gửi lên header, tránh việc bấm nút đặt hàng nhiều lần dẫn đến trùng lặp đơn
 
-**Definition of Done:** Ownership test: User A không thể xem order của User B → 403.
+**Definition of Done:** Ownership test: User A không thể xem order của User B → 403. Giao diện Checkout gửi kèm Idempotency-Key và hiển thị chính xác kết quả đặt hàng, click 2 lần liên tiếp không bị trùng đơn hàng.
 
 ---
 
@@ -536,8 +557,9 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
   ```
 - `[ ]` Implement Mock Payment: PENDING → COMPLETED (sau 2 giây mock)
 - `[ ]` Implement `POST /api/payments/{id}/refund` — MANAGER hoặc ADMIN only
+- `[ ]` Xây dựng giao diện xem trạng thái hoạt động các microservices (Eureka Dashboard / Instances health check page) dành riêng cho ADMIN
 
-**Definition of Done:** Order Service gọi Payment Service thành công với service token. Direct call từ bên ngoài (user token) → 403.
+**Definition of Done:** Order Service gọi Payment Service thành công với service token. Direct call từ bên ngoài (user token) → 403. Giao diện quản trị Admin hiển thị đúng danh sách các service đang UP/DOWN từ Eureka API.
 
 ---
 
@@ -574,8 +596,9 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 - `[ ]` Implement `NotificationService` consume `order-created`:
   - Log "Gửi email xác nhận đơn hàng" (mock gửi email)
   - Implement Idempotent Consumer (check event_id đã xử lý chưa)
+- `[ ]` Xây dựng giao diện Centralized Reports Dashboard hiển thị các biểu đồ trực quan về doanh thu bán hàng, số lượng đơn hàng, và biểu đồ tài nguyên (CPU, Memory, Request Rate)
 
-**Definition of Done:** Tạo order → outbox event → Kafka → Notification Service log email confirmation.
+**Definition of Done:** Tạo order → outbox event → Kafka → Notification Service log email confirmation. Giao diện báo cáo và biểu đồ metrics hiển thị dữ liệu chính xác trên Next.js Dashboard.
 
 ---
 
@@ -604,8 +627,9 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
   ```
 - `[ ]` Test: Dừng Payment Service → Order Service trả về fallback response → Circuit Breaker OPEN
 - `[ ]` Khởi động lại Payment Service → Circuit Breaker chuyển HALF-OPEN → CLOSED
+- `[ ]` Xây dựng Fallback UI / Error Boundary thân thiện khi API Gateway báo lỗi timeout hoặc 503 Service Unavailable (khi Circuit Breaker ở trạng thái OPEN), hiển thị thông báo "Hệ thống đang bận, xin vui lòng thử lại sau"
 
-**Definition of Done:** Order Service không bị sập khi Payment Service down. Circuit Breaker hoạt động đúng states.
+**Definition of Done:** Order Service không bị sập khi Payment Service down. Circuit Breaker hoạt động đúng states. Giao diện Frontend hiển thị Fallback UI khi backend bị sập hoặc gặp sự cố quá tải.
 
 ---
 
@@ -634,8 +658,9 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
   - Dùng RT → nhận RT mới → Dùng RT cũ lần nữa → System detect replay → Revoke cả family
 - `[ ]` Brute Force Test:
   - Script 6 lần login sai liên tiếp → Account locked → 429
+- `[ ]` Giao diện E2E Security Tests: Kiểm tra xử lý tự động khi Token hết hạn (NextAuth.js token rotation & auto-redirect), bảo mật XSS chống script injection trên input forms, và kiểm tra cookie bảo mật (HttpOnly, SameSite)
 
-**Definition of Done:** Tất cả attack scenarios bị block đúng cách.
+**Definition of Done:** Tất cả attack scenarios bị block đúng cách. Giao diện người dùng xử lý bảo mật chính xác, tự động logout hoặc refresh token khi hết hạn mà không gây lỗi giao diện.
 
 ---
 
@@ -744,9 +769,10 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 - `[ ]` Viết `.gitlab-ci.yml` định nghĩa CI/CD pipeline với stages: build, test, docker-build, deploy
 - `[ ]` Viết các file Kubernetes manifests (Deployment, Service, Ingress, ConfigMap, Secret) cho cụm local/staging
 - `[ ]` Cấu hình Nginx Ingress Controller làm reverse proxy thay cho Gateway ở môi trường K8s
+- `[ ]` Viết multi-stage `Dockerfile` cho Next.js Frontend (chạy standalone Node.js server) và tích hợp vào `docker-compose.full.yml` cũng như K8s deployment manifests
 - `[ ]` Test cold start: `docker compose up --build` từ đầu → toàn bộ hệ thống healthy trong 120s
 
-**Definition of Done:** `docker compose up --build` → mọi thứ chạy. Health endpoints trả về UP. CI pipeline pass hoàn toàn. K8s manifests sẵn sàng.
+**Definition of Done:** `docker compose up --build` → mọi thứ chạy (bao gồm cả Next.js Frontend). Health endpoints trả về UP. CI pipeline pass hoàn toàn. K8s manifests sẵn sàng cho cả backend & frontend.
 
 ---
 
