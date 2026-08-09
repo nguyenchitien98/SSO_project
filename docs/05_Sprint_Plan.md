@@ -23,17 +23,17 @@ Phase 5 — Observability & Production    (Sprint 22-25)
 **Mục tiêu:** Khởi tạo repository, cấu hình toàn bộ infrastructure bằng Docker Compose.
 
 **Tasks:**
-- `[ ]` Tạo Maven multi-module project với modules: `sso-server`, `monolith-app`, `microservice-app/*`, `common-contracts`
-- `[ ]` Tạo `docker-compose.infra.yml` bao gồm:
-  - PostgreSQL 16 (ports: 5432 — shared) với 4 databases: `sso_db`, `monolith_db`, `microservice_db` (cho dev; prod sẽ tách riêng)
+- `[x] Tạo Maven multi-module project với modules: sso-server, monolith-app, microservice-app/*, common-contracts`
+- `[x] Tạo docker-compose.infra.yml bao gồm:`
+  - PostgreSQL 16 (ports: 5432 — shared) với các databases cần thiết
   - Redis 7 (:6379)
   - Apache Kafka + Zookeeper (:9092)
-  - Kafka UI (:8080)
+  - Kafka UI (:8081)
   - Prometheus (:9090)
-  - Grafana (:3000)
-- `[ ]` Tạo `.cursorrules`, `clauderules.md`, `geminirules.md` với ngữ cảnh project
-- `[ ]` Tạo file `docs/` đầy đủ theo structure
-- `[ ]` Setup Flyway migration cho `sso_db` (V1__init_schema.sql)
+  - Loki & Promtail & Grafana (:3001)
+- `[x] Tạo .cursorrules, clauderules.md, geminirules.md với ngữ cảnh project`
+- `[x] Tạo file docs/ đầy đủ theo structure`
+- `[x] Setup Flyway migration cho sso_db (V1__init_schema.sql)`
 
 **Definition of Done:** `docker compose up -d` chạy thành công, tất cả services healthy.
 

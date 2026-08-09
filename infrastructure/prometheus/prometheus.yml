@@ -1,0 +1,49 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'sso-server'
+    static_configs:
+      - targets: ['sso-server:9000']
+    metrics_path: '/actuator/prometheus'
+
+  - job_name: 'monolith-app'
+    static_configs:
+      - targets: ['monolith-app:8080']
+    metrics_path: '/actuator/prometheus'
+
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8090']
+    metrics_path: '/actuator/prometheus'
+
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:8091']
+    metrics_path: '/actuator/prometheus'
+
+  - job_name: 'product-service'
+    static_configs:
+      - targets: ['product-service:8092']
+    metrics_path: '/actuator/prometheus'
+
+  - job_name: 'order-service'
+    static_configs:
+      - targets: ['order-service:8093']
+    metrics_path: '/actuator/prometheus'
+
+  - job_name: 'payment-service'
+    static_configs:
+      - targets: ['payment-service:8094']
+    metrics_path: '/actuator/prometheus'
+
+  - job_name: 'file-service'
+    static_configs:
+      - targets: ['file-service:8096']
+    metrics_path: '/actuator/prometheus'
+
+  - job_name: 'config-server'
+    static_configs:
+      - targets: ['config-server:8888']
+    metrics_path: '/actuator/prometheus'
