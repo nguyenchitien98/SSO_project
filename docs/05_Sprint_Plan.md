@@ -43,12 +43,12 @@ Phase 5 — Observability & Production    (Sprint 22-25)
 **Mục tiêu:** Tạo các shared contracts và database schema đầy đủ.
 
 **Tasks:**
-- `[ ]` Tạo `common-contracts` module chứa:
+- `[x] Tạo common-contracts module chứa:`
   - `ApiResponse<T>` record
   - `ErrorCode` enum
   - `BusinessException` class
   - Kafka event DTOs: `OrderCreatedEvent`, `PaymentCompletedEvent`, `UserRegisteredEvent`
-- `[ ]` Viết Flyway migration `sso_db`:
+- `[x] Viết Flyway migration sso_db:`
   - `V1__create_users_table.sql`
   - `V2__create_roles_permissions_tables.sql`
   - `V3__create_user_roles_role_permissions.sql`
@@ -56,13 +56,13 @@ Phase 5 — Observability & Production    (Sprint 22-25)
   - `V5__create_sessions_refresh_tokens_tables.sql`
   - `V6__create_audit_logs_table.sql`
   - `V7__insert_default_roles_permissions.sql` (seed data)
-- `[ ]` Viết Flyway migration `monolith_db`:
+- `[x] Viết Flyway migration monolith_db:`
   - `V1__create_user_profiles_table.sql`
   - `V2__create_products_table.sql`
   - `V3__create_orders_order_items_tables.sql`
   - `V4__create_payments_table.sql`
   - `V5__create_audit_logs_table.sql`
-- `[ ]` Viết Flyway migration `order_db` và `product_db` cho Microservice
+- `[x] Viết Flyway migration order_db, product_db, user_db, payment_db, notification_db, file_db cho Microservice`
 
 **Definition of Done:** Chạy Flyway migrate thành công, schema đúng với thiết kế ở Architecture Bible.
 
