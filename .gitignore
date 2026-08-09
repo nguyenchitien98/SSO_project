@@ -1,0 +1,57 @@
+# Target build folders
+target/
+**/target/
+
+# Compiled class files
+*.class
+**/*.class
+
+# Log files
+*.log
+**/*.log
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Tooling / IDEs
+.idea/
+**/.idea/
+*.iml
+**/*.iml
+.vscode/
+**/.vscode/
+.classpath
+.project
+.settings/
+.nb-gradle/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Docker persistence volumes local mapping (just in case)
+**/postgres_data/
+**/redis_data/
+**/minio_data/
+**/grafana_data/
+
+# Frontend / Next.js
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+out/
+**/out/
+build/
+**/build/
+.env*.local
+**/.env*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
