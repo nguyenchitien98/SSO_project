@@ -57,6 +57,8 @@ public class AuthorizationServerConfig {
     http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
 
     http
+        // Bật cấu hình CORS
+        .cors(Customizer.withDefaults())
         // Khi nhận yêu cầu chưa xác thực từ trình duyệt ở các API bảo mật -> chuyển hướng đến trang
         // login
         .exceptionHandling(

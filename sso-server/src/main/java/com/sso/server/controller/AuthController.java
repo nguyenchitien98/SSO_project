@@ -116,14 +116,29 @@ public class AuthController {
     }
   }
 
+  private User resolveUser(Object principal) {
+    if (principal instanceof SsoUserDetails) {
+      return ((SsoUserDetails) principal).getUser();
+    }
+    if (principal instanceof org.springframework.security.oauth2.jwt.Jwt) {
+      org.springframework.security.oauth2.jwt.Jwt jwt =
+          (org.springframework.security.oauth2.jwt.Jwt) principal;
+      return userRepository
+          .findById(java.util.UUID.fromString(jwt.getSubject()))
+          .orElseThrow(
+              () -> new BusinessException(ErrorCode.NOT_FOUND, "Không tìm thấy người dùng"));
+    }
+    throw new BusinessException(ErrorCode.UNAUTHORIZED, "Phiên đăng nhập không hợp lệ");
+  }
+
   /** API REST thay đổi mật khẩu tài khoản người dùng hiện tại. */
   @PostMapping("/auth/change-password")
   @ResponseBody
   public ResponseEntity<ApiResponse<Void>> changePassword(
-      @AuthenticationPrincipal SsoUserDetails userDetails,
+      @AuthenticationPrincipal Object principal,
       @Valid @RequestBody ChangePasswordRequest request) {
 
-    User user = userDetails.getUser();
+    User user = resolveUser(principal);
     log.info(
         "API POST /auth/change-password - Yêu cầu đổi mật khẩu cho user: {}", user.getUsername());
 
@@ -145,9 +160,9 @@ public class AuthController {
   @PostMapping("/auth/2fa/setup")
   @ResponseBody
   public ResponseEntity<ApiResponse<TotpSetupResponse>> setupTotp(
-      @AuthenticationPrincipal SsoUserDetails userDetails, HttpSession session) {
+      @AuthenticationPrincipal Object principal, HttpSession session) {
 
-    User user = userDetails.getUser();
+    User user = resolveUser(principal);
     log.info("API POST /auth/2fa/setup - Khởi tạo thiết lập 2FA cho user: {}", user.getUsername());
 
     // Sinh secret key mới tạm thời và lưu vào session để xác nhận trước khi lưu DB
@@ -166,11 +181,11 @@ public class AuthController {
   @PostMapping("/auth/2fa/verify")
   @ResponseBody
   public ResponseEntity<ApiResponse<Void>> verifyAndEnableTotp(
-      @AuthenticationPrincipal SsoUserDetails userDetails,
+      @AuthenticationPrincipal Object principal,
       @RequestBody Map<String, String> payload,
       HttpSession session) {
 
-    User user = userDetails.getUser();
+    User user = resolveUser(principal);
     String code = payload.get("code");
     log.info(
         "API POST /auth/2fa/verify - Yêu cầu xác nhận mã OTP kích hoạt 2FA cho user: {}",
@@ -196,9 +211,11 @@ public class AuthController {
       dbUser.setUpdatedAt(Instant.now());
       userRepository.save(dbUser);
 
-      // Cập nhật session user details hiện tại
-      user.setTotpSecret(tempSecret);
-      user.setTotpEnabled(true);
+      // Cập nhật session user details hiện tại (nếu dùng cookie session)
+      if (principal instanceof SsoUserDetails) {
+        user.setTotpSecret(tempSecret);
+        user.setTotpEnabled(true);
+      }
 
       session.removeAttribute("TEMP_TOTP_SECRET");
       log.info("Kích hoạt bảo mật 2 lớp thành công cho user: {}", user.getUsername());

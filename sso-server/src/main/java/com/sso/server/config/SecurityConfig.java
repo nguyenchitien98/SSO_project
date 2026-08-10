@@ -2,6 +2,7 @@ package com.sso.server.config;
 
 import com.sso.server.security.CustomUserDetailsService;
 import com.sso.server.security.SsoAuthenticationSuccessHandler;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * Cấu hình bảo mật Spring Security (User Authentication Security Chain).
@@ -42,13 +46,14 @@ public class SecurityConfig {
   @Bean
   @Order(2)
   public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-    http.authorizeHttpRequests(
+    http.cors(Customizer.withDefaults()) // Kích hoạt CORS
+        .authorizeHttpRequests(
             authorize ->
                 authorize
                     .requestMatchers("/actuator/**")
                     .permitAll() // Cho phép truy cập metrics giám sát công khai
                     .requestMatchers("/admin/**")
-                    .hasAuthority("SCOPE_admin") // Bảo mật API admin
+                    .hasAnyAuthority("SCOPE_admin", "ROLE_ADMIN") // Bảo mật API admin
                     .requestMatchers("/login", "/login/2fa", "/error", "/css/**", "/js/**")
                     .permitAll() // Cho phép truy cập màn hình login/2fa công khai
                     .anyRequest()
@@ -66,6 +71,20 @@ public class SecurityConfig {
         .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll());
 
     return http.build();
+  }
+
+  /** Cấu hình chia sẻ tài nguyên chéo nguồn (CORS) cho Frontend Dev Servers. */
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "x-requested-with"));
+    configuration.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
   }
 
   /**
