@@ -11,6 +11,7 @@ import com.sso.monolith.entity.UserProfile;
 import com.sso.monolith.repository.OrderRepository;
 import com.sso.monolith.repository.ProductRepository;
 import com.sso.monolith.repository.UserProfileRepository;
+import com.sso.monolith.security.annotation.Auditable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class OrderService {
    */
   @Transactional
   @PreAuthorize("hasAuthority('ORDER_CREATE')")
+  @Auditable(action = "ORDER_CREATE", resource = "Order")
   public OrderResponse createOrder(CreateOrderRequest request, UUID userId) {
     log.info("Bắt đầu xử lý đặt hàng cho user UUID: {}", userId);
 
@@ -196,6 +198,7 @@ public class OrderService {
    */
   @Transactional
   @PreAuthorize("@orderSecurity.isOwnerOrAdmin(authentication, #orderId)")
+  @Auditable(action = "ORDER_CANCEL", resource = "Order")
   public OrderResponse cancelOrder(@P("orderId") Long orderId) {
     log.warn("Thực hiện hủy đơn hàng ID: {}", orderId);
     Order order =

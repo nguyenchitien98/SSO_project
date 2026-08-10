@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.sso.monolith.entity.Order;
 import com.sso.monolith.entity.Product;
 import com.sso.monolith.entity.UserProfile;
+import com.sso.monolith.repository.AuditLogRepository;
 import com.sso.monolith.repository.OrderRepository;
 import com.sso.monolith.repository.PaymentRepository;
 import com.sso.monolith.repository.ProductRepository;
@@ -53,6 +54,8 @@ class OrderServiceSecurityTest {
 
   @Autowired private PaymentRepository paymentRepository;
 
+  @Autowired private AuditLogRepository auditLogRepository;
+
   @MockBean
   private org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
       clientRegistrationRepository;
@@ -66,6 +69,7 @@ class OrderServiceSecurityTest {
   @BeforeEach
   void setUp() {
     // Xóa sạch dữ liệu DB in-memory H2 theo thứ tự đúng ràng buộc khóa ngoại
+    auditLogRepository.deleteAll();
     paymentRepository.deleteAll();
     orderRepository.deleteAll();
     productRepository.deleteAll();

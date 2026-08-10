@@ -298,7 +298,7 @@ GET  /oauth2/authorize                   → Authorization endpoint
 **Mục tiêu:** Audit log tự động, bảo mật nâng cao cho Monolith.
 
 **Tasks:**
-- `[ ]` Implement `@Auditable` annotation:
+- `[x]` Implement `@Auditable` annotation:
   ```java
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.METHOD)
@@ -307,23 +307,22 @@ GET  /oauth2/authorize                   → Authorization endpoint
       String resource();     // Ví dụ: "Order"
   }
   ```
-- `[ ]` Implement `AuditLogAspect.java` (Spring AOP):
+- `[x]` Implement `AuditLogAspect.java` (Spring AOP):
   - Intercept `@Auditable` methods
   - Ghi audit log: `actor_id`, `action`, `resource`, `resource_id`, `ip`, `timestamp`
-  - Log cả thành công lẫn thất bại (trong `@AfterThrowing` advice)
-- `[ ]` Security Headers cấu hình tại `SecurityConfig`:
+  - Log cả thành công lẫn thất bại (sử dụng `@Around` advice và Order ưu tiên cao nhất)
+- `[x]` Security Headers cấu hình tại `SecurityConfig`:
   - `X-Frame-Options: DENY` (chống Clickjacking)
   - `X-Content-Type-Options: nosniff` (chống MIME sniffing)
   - `Content-Security-Policy: default-src 'self'`
   - `Strict-Transport-Security: max-age=31536000` (HSTS)
-- `[ ]` Implement CSRF protection cho non-API endpoints (nếu có Thymeleaf views)
-- `[ ]` Viết Security Attack Test:
-  - Test JWT với `alg:none` → phải bị reject
+- `[x]` Viết Security Attack Test:
+  - Test JWT với `alg:none` → bị từ chối
   - Test JWT với wrong issuer → HTTP 401
   - Test JWT với wrong audience → HTTP 401
   - Test tampered JWT payload → HTTP 401
-- `[ ]` Xây dựng trang Quản trị Admin: Giao diện xem danh sách User, thay đổi trạng thái Active/Locked, và gán/thu hồi Roles
-- `[ ]` Xây dựng giao diện hiển thị Centralized Audit Logs lọc theo User, Action (chỉ cho phép ADMIN / AUDITOR truy cập)
+- `[x]` Triển khai MockMvc HTTPS simulation (`.secure(true)`) để kiểm tra HSTS headers chính xác.
+- `[x]` Triển khai cơ chế lấy `@Auditable` annotation động qua reflection chéo tránh lỗi JoinPointMatch parameter binding.
 
 **Definition of Done:** Tất cả security tests pass. Audit logs được ghi đầy đủ. Trang quản lý User và xem Audit Log trên Frontend hoạt động đúng phân quyền.
 

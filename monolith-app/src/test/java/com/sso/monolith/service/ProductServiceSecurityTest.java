@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.sso.monolith.dto.request.CreateProductRequest;
 import com.sso.monolith.entity.UserProfile;
+import com.sso.monolith.repository.AuditLogRepository;
 import com.sso.monolith.repository.OrderRepository;
 import com.sso.monolith.repository.ProductRepository;
 import com.sso.monolith.repository.UserProfileRepository;
@@ -37,6 +38,7 @@ class ProductServiceSecurityTest {
   @Autowired private ProductRepository productRepository;
   @Autowired private UserProfileRepository userProfileRepository;
   @Autowired private OrderRepository orderRepository;
+  @Autowired private AuditLogRepository auditLogRepository;
 
   @MockBean
   private org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -50,6 +52,7 @@ class ProductServiceSecurityTest {
 
   @BeforeEach
   void setUp() {
+    auditLogRepository.deleteAll();
     orderRepository.deleteAll();
     productRepository.deleteAll();
     userProfileRepository.deleteAll();

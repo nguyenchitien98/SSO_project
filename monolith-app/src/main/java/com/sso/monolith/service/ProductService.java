@@ -9,6 +9,7 @@ import com.sso.monolith.entity.Product;
 import com.sso.monolith.entity.UserProfile;
 import com.sso.monolith.repository.ProductRepository;
 import com.sso.monolith.repository.UserProfileRepository;
+import com.sso.monolith.security.annotation.Auditable;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -79,6 +80,7 @@ public class ProductService {
    */
   @Transactional
   @PreAuthorize("hasAuthority('PRODUCT_CREATE')")
+  @Auditable(action = "PRODUCT_CREATE", resource = "Product")
   public ProductResponse createProduct(CreateProductRequest request, UUID creatorId) {
     log.info("Thực hiện tạo sản phẩm mới chéo bởi user UUID: {}", creatorId);
 
@@ -148,6 +150,7 @@ public class ProductService {
    */
   @Transactional
   @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+  @Auditable(action = "PRODUCT_DELETE", resource = "Product")
   public void deleteProduct(Long id) {
     log.warn("Yêu cầu xóa sản phẩm ID: {}", id);
     Product product =

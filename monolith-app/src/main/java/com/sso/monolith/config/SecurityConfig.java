@@ -35,6 +35,20 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable()) // Tắt CSRF để thuận tiện cho việc gọi REST APIs
         .cors(Customizer.withDefaults()) // Áp dụng cấu hình CORS
+        .headers(
+            headers ->
+                headers
+                    .frameOptions(frame -> frame.deny()) // X-Frame-Options: DENY
+                    .contentTypeOptions(
+                        Customizer.withDefaults()) // X-Content-Type-Options: nosniff
+                    .contentSecurityPolicy(
+                        csp ->
+                            csp.policyDirectives("default-src 'self'")) // Content-Security-Policy
+                    .httpStrictTransportSecurity(
+                        hsts ->
+                            hsts.maxAgeInSeconds(31536000)
+                                .includeSubDomains(true) // Strict-Transport-Security (HSTS)
+                        ))
         .authorizeHttpRequests(
             authorize ->
                 authorize
