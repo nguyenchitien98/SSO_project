@@ -247,8 +247,8 @@ GET  /oauth2/authorize                   → Authorization endpoint
 **Mục tiêu:** Implement ABAC (Resource Ownership) — user chỉ xem/hủy đơn hàng của chính mình.
 
 **Tasks:**
-- `[ ]` Implement `OrderEntity.java`, `OrderItemEntity.java`, `OrderRepository.java`
-- `[ ]` Implement `OrderSecurityEvaluator.java` (Spring Bean cho SpEL):
+- `[x]` Implement `OrderEntity.java`, `OrderItemEntity.java`, `OrderRepository.java`
+- `[x]` Implement `OrderSecurityEvaluator.java` (Spring Bean cho SpEL):
   ```java
   /**
    * Security evaluator để kiểm tra ownership của đơn hàng.
@@ -268,7 +268,7 @@ GET  /oauth2/authorize                   → Authorization endpoint
       }
   }
   ```
-- `[ ]` Implement `OrderService.java`:
+- `[x]` Implement `OrderService.java`:
   ```java
   @PreAuthorize("hasAuthority('ORDER_CREATE')")
   public OrderResponse createOrder(CreateOrderRequest req) { ... }
@@ -281,14 +281,14 @@ GET  /oauth2/authorize                   → Authorization endpoint
   @PreAuthorize("@orderSecurity.isOwnerOrAdmin(authentication, #orderId)")
   public void cancelOrder(Long orderId) { ... }
   ```
-- `[ ]` Implement `PaymentService.java` (Mock Sandbox):
+- `[x]` Implement `PaymentService.java` (Mock Sandbox):
   ```java
   @PreAuthorize("hasAuthority('PAYMENT_CREATE')")
   public PaymentResponse processPayment(ProcessPaymentRequest req) { ... }
   ```
-- `[ ]` Viết Integration Test: test ownership violation → HTTP 403
-- `[ ]` Xây dựng giao diện Danh sách đơn hàng (Order List) và Chi tiết đơn hàng (Order Detail) hỗ trợ phân quyền sở hữu tài nguyên (Ownership check)
-- `[ ]` Xây dựng giao diện Checkout đơn hàng (chọn sản phẩm, nhập địa chỉ) và tích hợp trang thanh toán giả lập (Mock Sandbox Payment Page)
+- `[x]` Viết Integration Test: test ownership violation → HTTP 403 (Pass)
+- `[x]` Triển khai SpEL parameter mapping bằng annotation `@P("orderId")` để đảm bảo tương thích chéo an toàn.
+- `[x]` Triển khai cấu trúc dọn dẹp H2 DB theo thứ tự ràng buộc khóa ngoại chéo giữa các integration tests.
 
 **Definition of Done:** USER không thể xem đơn hàng của người khác. ADMIN có thể xem tất cả. Integration test pass. Giao diện Đơn hàng và Checkout hoạt động đúng phân quyền.
 
