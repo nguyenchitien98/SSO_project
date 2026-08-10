@@ -33,12 +33,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 class CustomUserDetailsServiceTest {
 
   @Mock private UserRepository userRepository;
+  @Mock private BruteForceProtectionService bruteForceProtectionService;
 
   private CustomUserDetailsService userDetailsService;
 
   @BeforeEach
   void setUp() {
-    userDetailsService = new CustomUserDetailsService(userRepository);
+    userDetailsService = new CustomUserDetailsService(userRepository, bruteForceProtectionService);
   }
 
   @Test
@@ -59,6 +60,7 @@ class CustomUserDetailsServiceTest {
             .roles(Set.of(userRole))
             .build();
 
+    when(bruteForceProtectionService.isBlocked("testuser")).thenReturn(false);
     when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
     // Act: Thực thi phương thức cần test
@@ -83,6 +85,7 @@ class CustomUserDetailsServiceTest {
   @Test
   void loadUserByUsername_NotFound() {
     // Arrange: Giả lập không tìm thấy user
+    when(bruteForceProtectionService.isBlocked("unknown")).thenReturn(false);
     when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
 
     // Act & Assert: Xác thực ném ngoại lệ UsernameNotFoundException
@@ -90,6 +93,19 @@ class CustomUserDetailsServiceTest {
         UsernameNotFoundException.class,
         () -> {
           userDetailsService.loadUserByUsername("unknown");
+        });
+  }
+
+  @Test
+  void loadUserByUsername_Blocked() {
+    // Arrange: Giả lập user bị block
+    when(bruteForceProtectionService.isBlocked("blockeduser")).thenReturn(true);
+
+    // Act & Assert: Xác thực ném ngoại lệ LockedException
+    assertThrows(
+        org.springframework.security.authentication.LockedException.class,
+        () -> {
+          userDetailsService.loadUserByUsername("blockeduser");
         });
   }
 }

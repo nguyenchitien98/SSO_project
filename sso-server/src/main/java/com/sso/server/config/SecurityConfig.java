@@ -1,6 +1,7 @@
 package com.sso.server.config;
 
 import com.sso.server.security.CustomUserDetailsService;
+import com.sso.server.security.SsoAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
   private final CustomUserDetailsService userDetailsService;
+  private final SsoAuthenticationSuccessHandler successHandler;
 
   /**
    * Cấu hình chuỗi bảo mật mặc định cho các request thông thường (không phải OAuth2 protocol).
@@ -47,6 +49,8 @@ public class SecurityConfig {
                     .permitAll() // Cho phép truy cập metrics giám sát công khai
                     .requestMatchers("/admin/**")
                     .hasAuthority("SCOPE_admin") // Bảo mật API admin
+                    .requestMatchers("/login", "/login/2fa", "/error", "/css/**", "/js/**")
+                    .permitAll() // Cho phép truy cập màn hình login/2fa công khai
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(
@@ -55,8 +59,10 @@ public class SecurityConfig {
                     Customizer.withDefaults())) // Hỗ trợ xác thực JWT Bearer Token cho Admin APIs
         .formLogin(
             formLogin ->
-                formLogin.permitAll() // Sử dụng màn hình login mặc định của Spring Security
-            )
+                formLogin
+                    .loginPage("/login") // Màn hình đăng nhập tùy chỉnh
+                    .successHandler(successHandler) // Xử lý sau login thành công để check 2FA
+                    .permitAll())
         .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll());
 
     return http.build();

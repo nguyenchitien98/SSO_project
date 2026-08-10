@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cấp quyền ứng dụng | SSO Server</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #09090b 100%);
+            --bg-card: rgba(24, 24, 27, 0.75);
+            --color-brand: #6366f1;
+            --color-brand-hover: #4f46e5;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --border-color: rgba(39, 39, 42, 0.8);
+            --radius-lg: 12px;
+            --transition-fast: 150ms ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .consent-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 460px;
+            padding: 40px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--color-brand);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 16px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .scope-list {
+            margin: 24px 0;
+            background: rgba(9, 9, 11, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .scope-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(39, 39, 42, 0.4);
+        }
+
+        .scope-item:last-child {
+            border-bottom: none;
+        }
+
+        .scope-checkbox {
+            margin-top: 4px;
+            accent-color: var(--color-brand);
+            cursor: pointer;
+        }
+
+        .scope-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scope-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .scope-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-fast), transform var(--transition-fast);
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--color-brand);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-brand-hover);
+        }
+
+        .btn-secondary {
+            background: rgba(39, 39, 42, 0.6);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(39, 39, 42, 0.8);
+            color: var(--text-primary);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+    </style>
+    <script>
+        function cancelConsent() {
+            document.getElementById('consent-form').action = '/oauth2/authorize';
+            document.getElementById('user-oauth-consent').value = 'cancel';
+            document.getElementById('consent-form').submit();
+        }
+    </script>
+</head>
+<body>
+
+<div class="consent-card">
+    <div class="header">
+        <div class="logo">
+            <span class="logo-dot"></span>
+            Yêu cầu cấp quyền
+        </div>
+        <div class="title" th:text="${clientName}">Tên ứng dụng</div>
+        <div class="subtitle">Ứng dụng này đang yêu cầu truy cập thông tin tài khoản của bạn. Vui lòng xác nhận các quyền hạn sau:</div>
+    </div>
+
+    <form id="consent-form" method="post" action="/oauth2/authorize">
+        <input type="hidden" name="client_id" th:value="${clientId}">
+        <input type="hidden" name="state" th:value="${state}">
+        <input type="hidden" id="user-oauth-consent" name="consent" value="approve">
+
+        <div class="scope-list">
+            <!-- Scopes requested -->
+            <div class="scope-item" th:each="scope : ${scopes}">
+                <input class="scope-checkbox" type="checkbox" name="scope" th:value="${scope.scopeName}" th:id="${scope.scopeName}" checked>
+                <div class="scope-details">
+                    <label class="scope-name" th:for="${scope.scopeName}" th:text="${scope.scopeName}">scope</label>
+                    <span class="scope-desc" th:text="${scope.description}">Mô tả quyền hạn</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-secondary" type="button" onclick="cancelConsent()">Từ chối</button>
+            <button class="btn btn-primary" type="submit">Đồng ý cấp quyền</button>
+        </div>
+    </form>
+
+    <div class="footer">
+        Đang đăng nhập dưới tài khoản <strong th:text="${principalName}">user</strong>.
+    </div>
+</div>
+
+</body>
+</html>

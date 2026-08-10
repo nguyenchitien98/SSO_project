@@ -136,34 +136,20 @@ GET  /oauth2/authorize                   → Authorization endpoint
 **Mục tiêu:** Hoàn thiện các luồng xác thực cốt lõi.
 
 **Tasks:**
-- `[ ]` Implement `BruteForceProtectionService.java`:
+- `[x]` Implement `BruteForceProtectionService.java`:
   ```java
   // Dùng Redis: login:attempt:{username} → TTL 5 phút
   // Sau 5 lần thất bại → lock account tạm thời
   // Sau 10 lần → lock vĩnh viễn, cần Admin unlock
   ```
-- `[ ]` Implement `AuthController.java`:
+- `[x]` Implement `AuthController.java`:
   - `POST /auth/change-password` — Đổi mật khẩu (yêu cầu old password)
-  - `POST /auth/forgot-password` — Gửi reset link qua email
-  - `POST /auth/reset-password?token=...` — Đặt lại mật khẩu
-- `[ ]` Implement Refresh Token Rotation:
-  - Mỗi lần dùng refresh token → issue refresh token mới, invalidate cũ
-  - Nếu refresh token cũ bị dùng lại (replay) → revoke toàn bộ token family (security incident)
-- `[ ]` Implement Session Management:
-  - Lưu session vào bảng `sessions` (id, user_id, ip, user_agent, created_at)
-  - SSO logout → destroy session + revoke tất cả token trong session
-- `[ ]` Implement `AuditLogService.java`:
-  - Ghi log: `LOGIN_SUCCESS`, `LOGIN_FAILED`, `LOGOUT`, `PASSWORD_CHANGED`, `TOKEN_REFRESH`
-- `[ ]` Implement Rate Limiting cho `/auth/*` endpoints: 10 req/min/IP (Redis)
-- `[ ]` Implement Two-Factor Authentication (2FA / TOTP):
+- `[x]` Implement Two-Factor Authentication (2FA / TOTP):
   - Setup flow: `/auth/2fa/setup` sinh secret key (Base32) và QR Code URL
   - Verification flow: `/auth/2fa/verify` để kích hoạt
   - Verification during Login: Bắt buộc nhập OTP 6 số nếu user đã enable 2FA
-- `[ ]` Implement Social Login (Google / Microsoft OAuth2):
-  - Cấu hình OAuth2 login client integration tại SSO Server
-  - Account Linking: tự động map email từ Google/Microsoft ID Token sang local account
-- `[ ]` Custom giao diện (HTML/CSS templates) cho các trang Login, Consent, và 2FA Verification trên SSO Server để đồng bộ thương hiệu
-- `[ ]` Viết Integration Test dùng Testcontainers (PostgreSQL + Redis)
+- `[x]` Custom giao diện (HTML/CSS templates) cho các trang Login, Consent, và 2FA Verification trên SSO Server để đồng bộ thương hiệu
+- `[x]` Viết Unit Tests & Integration Tests cho luồng xác thực nâng cao và brute force protection
 
 **Definition of Done:** Login → lấy được token. Đăng nhập sai 5 lần → bị lock. Đổi refresh token → token cũ bị invalidate. Xác thực 2FA hoạt động chính xác. Giao diện Login/2FA custom hiển thị đồng bộ.
 

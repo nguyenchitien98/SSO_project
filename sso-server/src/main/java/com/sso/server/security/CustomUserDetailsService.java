@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomUserDetailsService implements UserDetailsService {
 
   private final UserRepository userRepository;
+  private final BruteForceProtectionService bruteForceProtectionService;
 
   /**
    * Tải thông tin chi tiết người dùng dựa trên tên đăng nhập.
@@ -37,6 +38,13 @@ public class CustomUserDetailsService implements UserDetailsService {
   @Transactional(readOnly = true)
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     log.info("Xác thực yêu cầu đăng nhập cho người dùng: {}", username);
+
+    // Kiểm tra trạng thái khóa tài khoản (Brute Force Protection)
+    if (bruteForceProtectionService.isBlocked(username)) {
+      log.warn("Đăng nhập bị từ chối: Tài khoản {} đang bị khóa bảo mật", username);
+      throw new org.springframework.security.authentication.LockedException(
+          "Tài khoản đã bị tạm khóa (30 phút) hoặc khóa vĩnh viễn do thử sai mật khẩu nhiều lần.");
+    }
 
     User user =
         userRepository

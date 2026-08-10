@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập | SSO Server</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #09090b 100%);
+            --bg-card: rgba(24, 24, 27, 0.75);
+            --color-brand: #6366f1;
+            --color-brand-hover: #4f46e5;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --border-color: rgba(39, 39, 42, 0.8);
+            --border-focus: #6366f1;
+            --color-error: #ef4444;
+            --radius-lg: 12px;
+            --transition-fast: 150ms ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--color-brand);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(9, 9, 11, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 15px;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--color-brand);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-fast), transform var(--transition-fast);
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--color-brand-hover);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--color-error);
+            color: var(--color-error);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="header">
+        <div class="logo">
+            <span class="logo-dot"></span>
+            SSO Nền Tảng
+        </div>
+        <div class="title">Đăng nhập tài khoản của bạn</div>
+    </div>
+
+    <!-- Hiển thị thông báo lỗi khi đăng nhập thất bại -->
+    <div class="error-message" th:if="${param.error}" th:text="${session.SPRING_SECURITY_LAST_EXCEPTION != null ? session.SPRING_SECURITY_LAST_EXCEPTION.message : 'Sai tài khoản hoặc mật khẩu'}">
+        Mật khẩu hoặc tên đăng nhập không chính xác
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <div class="form-group">
+            <label class="form-label" for="username">Tên đăng nhập</label>
+            <input class="form-input" type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="password">Mật khẩu</label>
+            <input class="form-input" type="password" id="password" name="password" placeholder="••••••••" required>
+        </div>
+
+        <button class="btn-submit" type="submit">Đăng nhập</button>
+    </form>
+
+    <div class="footer">
+        © 2026 SSO Platform Team. Bảo mật cao cấp.
+    </div>
+</div>
+
+</body>
+</html>

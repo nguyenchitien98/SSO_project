@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác minh 2 lớp | SSO Server</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #09090b 100%);
+            --bg-card: rgba(24, 24, 27, 0.75);
+            --color-brand: #8b5cf6; /* Violet cho 2FA */
+            --color-brand-hover: #7c3aed;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --border-color: rgba(39, 39, 42, 0.8);
+            --border-focus: #8b5cf6;
+            --color-error: #ef4444;
+            --radius-lg: 12px;
+            --transition-fast: 150ms ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--color-brand);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(9, 9, 11, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 6px;
+            text-align: center;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--color-brand);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .btn-submit:hover {
+            background-color: var(--color-brand-hover);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--color-error);
+            color: var(--color-error);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="header">
+        <div class="logo">
+            <span class="logo-dot"></span>
+            Xác minh bảo mật
+        </div>
+        <div class="title">Tài khoản của bạn đã được kích hoạt bảo mật 2 lớp. Vui lòng mở ứng dụng Google Authenticator để lấy mã.</div>
+    </div>
+
+    <!-- Hiển thị thông báo lỗi khi OTP sai -->
+    <div class="error-message" th:if="${error}">
+        Mã xác thực OTP không chính xác hoặc đã hết hạn
+    </div>
+
+    <form th:action="@{/login/2fa}" method="post">
+        <div class="form-group">
+            <label class="form-label" for="code">Nhập mã xác thực 6 chữ số</label>
+            <input class="form-input" type="text" id="code" name="code" placeholder="000000" maxlength="6" inputmode="numeric" required autofocus autocomplete="one-time-code">
+        </div>
+
+        <button class="btn-submit" type="submit">Xác thực & Tiếp tục</button>
+    </form>
+
+    <div class="footer">
+        © 2026 SSO Platform Team. Bảo mật cao cấp.
+    </div>
+</div>
+
+</body>
+</html>
