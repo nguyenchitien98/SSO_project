@@ -55,4 +55,7 @@ public class OauthClient {
   @Builder.Default
   @Column(name = "require_authorization_consent", nullable = false)
   private boolean requireAuthorizationConsent = false;
+
+  @Column(name = "back_channel_logout_uri", length = 255)
+  private String backChannelLogoutUri;
 }

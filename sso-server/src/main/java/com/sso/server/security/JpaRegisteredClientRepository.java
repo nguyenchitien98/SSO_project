@@ -93,12 +93,17 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
             .reuseRefreshTokens(false) // Issuing new refresh token each time rotated
             .build());
 
-    // Cấu hình Client Settings (PKCE & Consent)
-    builder.clientSettings(
+    // Cấu hình Client Settings (PKCE & Consent & Back-Channel Logout)
+    ClientSettings.Builder clientSettingsBuilder =
         ClientSettings.builder()
             .requireProofKey(client.isRequirePkce())
-            .requireAuthorizationConsent(client.isRequireAuthorizationConsent())
-            .build());
+            .requireAuthorizationConsent(client.isRequireAuthorizationConsent());
+
+    if (client.getBackChannelLogoutUri() != null && !client.getBackChannelLogoutUri().isBlank()) {
+      clientSettingsBuilder.setting(
+          "settings.client.oidc.back-channel-logout-uri", client.getBackChannelLogoutUri());
+    }
+    builder.clientSettings(clientSettingsBuilder.build());
 
     return builder.build();
   }

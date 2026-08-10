@@ -159,16 +159,16 @@ GET  /oauth2/authorize                   → Authorization endpoint
 **Mục tiêu:** Chứng minh SSO thực sự hoạt động giữa Monolith và Microservice App.
 
 **Tasks:**
-- `[ ]` Cấu hình SSO Server session persistence với Redis (không dùng in-memory)
+- `[x]` Cấu hình SSO Server session persistence với Redis (không dùng in-memory)
   - Lý do: Trong môi trường nhiều SSO Server instances, session phải shared
-- `[ ]` Test SSO flow đầy đủ:
+- `[x]` Test SSO flow đầy đủ:
   1. Login vào Monolith App → SSO redirect về Monolith
   2. Mở Microservice App → SSO phát hiện session đã tồn tại → không hỏi password lại
   3. Logout khỏi một app → Cả 2 app bị logout
-- `[ ]` Implement Back-Channel Logout (SSO notify apps khi user logout):
+- `[x]` Implement Back-Channel Logout (SSO notify apps khi user logout):
   - SSO gọi `POST {app}/logout` của từng registered client
-- `[ ]` Document toàn bộ flow bằng Sequence Diagram trong `docs/sequences/`
-- `[ ]` Viết Security Test: JWT tampering, expired token, wrong issuer
+- `[x]` Document toàn bộ flow bằng Sequence Diagram trong `docs/sequences/`
+- `[x]` Viết Security Test: JWT tampering, expired token, wrong issuer
 
 **Definition of Done:** SSO hoạt động giữa 2 app. Logout từ app A → app B cũng bị logout.
 
