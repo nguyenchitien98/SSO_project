@@ -17,14 +17,13 @@ import org.springframework.stereotype.Component;
 /**
  * Cài đặt custom {@link RegisteredClientRepository} kết nối PostgreSQL thông qua JPA.
  *
- * <p>Thay vì lưu trữ danh sách Clients OAuth2 trong bộ nhớ tạm (In-Memory), lớp này truy vấn
- * bảng `oauth_clients` để nạp cấu hình client động tại runtime.
+ * <p>Thay vì lưu trữ danh sách Clients OAuth2 trong bộ nhớ tạm (In-Memory), lớp này truy vấn bảng
+ * `oauth_clients` để nạp cấu hình client động tại runtime.
  *
- * <p>Quy trình map cấu hình:
- * - Ánh xạ các trường dữ liệu `grant_types`, `redirect_uris`, `scopes` dạng chuỗi thô phân cách
- *   bằng dấu phẩy/khoảng trắng thành các đối tượng tương ứng của Spring Security.
- * - Cấu hình thời gian sống của token: Access Token (mặc định 15 phút), Refresh Token (mặc định 7 ngày).
- * - Bật/tắt yêu cầu xác thực mã PKCE và hiển thị màn hình chấp thuận (consent).
+ * <p>Quy trình map cấu hình: - Ánh xạ các trường dữ liệu `grant_types`, `redirect_uris`, `scopes`
+ * dạng chuỗi thô phân cách bằng dấu phẩy/khoảng trắng thành các đối tượng tương ứng của Spring
+ * Security. - Cấu hình thời gian sống của token: Access Token (mặc định 15 phút), Refresh Token
+ * (mặc định 7 ngày). - Bật/tắt yêu cầu xác thực mã PKCE và hiển thị màn hình chấp thuận (consent).
  *
  * @author SSO Platform Team
  * @since Sprint 02
@@ -34,74 +33,73 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JpaRegisteredClientRepository implements RegisteredClientRepository {
 
-    private final OauthClientRepository oauthClientRepository;
+  private final OauthClientRepository oauthClientRepository;
 
-    @Override
-    public void save(RegisteredClient registeredClient) {
-        log.warn("Thao tác save client trực tiếp bị vô hiệu hóa qua Repository này. Vui lòng cập nhật DB qua Seed hoặc Admin API.");
+  @Override
+  public void save(RegisteredClient registeredClient) {
+    log.warn(
+        "Thao tác save client trực tiếp bị vô hiệu hóa qua Repository này. Vui lòng cập nhật DB qua Seed hoặc Admin API.");
+  }
+
+  @Override
+  public RegisteredClient findById(String id) {
+    log.info("Truy vấn thông tin OAuth2 Client theo ID: {}", id);
+    return oauthClientRepository.findById(id).map(this::mapToRegisteredClient).orElse(null);
+  }
+
+  @Override
+  public RegisteredClient findByClientId(String clientId) {
+    log.info("Truy vấn thông tin OAuth2 Client theo Client ID: {}", clientId);
+    return oauthClientRepository.findById(clientId).map(this::mapToRegisteredClient).orElse(null);
+  }
+
+  private RegisteredClient mapToRegisteredClient(OauthClient client) {
+    RegisteredClient.Builder builder =
+        RegisteredClient.withId(client.getId())
+            .clientId(client.getId())
+            .clientSecret(client.getClientSecret())
+            .clientName(client.getClientName());
+
+    // Cấu hình các phương thức Client Authentication được chấp nhận
+    builder.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
+    builder.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST);
+    builder.clientAuthenticationMethod(
+        ClientAuthenticationMethod.NONE); // Dành cho PKCE Public Client
+
+    // Map các Grant Types
+    if (client.getGrantTypes() != null) {
+      Arrays.stream(client.getGrantTypes().split(","))
+          .map(String::trim)
+          .forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
     }
 
-    @Override
-    public RegisteredClient findById(String id) {
-        log.info("Truy vấn thông tin OAuth2 Client theo ID: {}", id);
-        return oauthClientRepository.findById(id)
-                .map(this::mapToRegisteredClient)
-                .orElse(null);
+    // Map các Redirect URIs
+    if (client.getRedirectUris() != null) {
+      Arrays.stream(client.getRedirectUris().split(","))
+          .map(String::trim)
+          .forEach(builder::redirectUri);
     }
 
-    @Override
-    public RegisteredClient findByClientId(String clientId) {
-        log.info("Truy vấn thông tin OAuth2 Client theo Client ID: {}", clientId);
-        return oauthClientRepository.findById(clientId)
-                .map(this::mapToRegisteredClient)
-                .orElse(null);
+    // Map các Scopes
+    if (client.getScopes() != null) {
+      Arrays.stream(client.getScopes().split(" ")).map(String::trim).forEach(builder::scope);
     }
 
-    private RegisteredClient mapToRegisteredClient(OauthClient client) {
-        RegisteredClient.Builder builder = RegisteredClient.withId(client.getId())
-                .clientId(client.getId())
-                .clientSecret(client.getClientSecret())
-                .clientName(client.getClientName());
+    // Cấu hình Token TTL
+    builder.tokenSettings(
+        TokenSettings.builder()
+            .accessTokenTimeToLive(Duration.ofSeconds(client.getAccessTokenTtlSeconds()))
+            .refreshTokenTimeToLive(Duration.ofSeconds(client.getRefreshTokenTtlSeconds()))
+            .reuseRefreshTokens(false) // Issuing new refresh token each time rotated
+            .build());
 
-        // Cấu hình các phương thức Client Authentication được chấp nhận
-        builder.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
-        builder.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST);
-        builder.clientAuthenticationMethod(ClientAuthenticationMethod.NONE); // Dành cho PKCE Public Client
+    // Cấu hình Client Settings (PKCE & Consent)
+    builder.clientSettings(
+        ClientSettings.builder()
+            .requireProofKey(client.isRequirePkce())
+            .requireAuthorizationConsent(client.isRequireAuthorizationConsent())
+            .build());
 
-        // Map các Grant Types
-        if (client.getGrantTypes() != null) {
-            Arrays.stream(client.getGrantTypes().split(","))
-                    .map(String::trim)
-                    .forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
-        }
-
-        // Map các Redirect URIs
-        if (client.getRedirectUris() != null) {
-            Arrays.stream(client.getRedirectUris().split(","))
-                    .map(String::trim)
-                    .forEach(builder::redirectUri);
-        }
-
-        // Map các Scopes
-        if (client.getScopes() != null) {
-            Arrays.stream(client.getScopes().split(" "))
-                    .map(String::trim)
-                    .forEach(builder::scope);
-        }
-
-        // Cấu hình Token TTL
-        builder.tokenSettings(TokenSettings.builder()
-                .accessTokenTimeToLive(Duration.ofSeconds(client.getAccessTokenTtlSeconds()))
-                .refreshTokenTimeToLive(Duration.ofSeconds(client.getRefreshTokenTtlSeconds()))
-                .reuseRefreshTokens(false) // Issuing new refresh token each time rotated
-                .build());
-
-        // Cấu hình Client Settings (PKCE & Consent)
-        builder.clientSettings(ClientSettings.builder()
-                .requireProofKey(client.isRequirePkce())
-                .requireAuthorizationConsent(client.isRequireAuthorizationConsent())
-                .build());
-
-        return builder.build();
-    }
+    return builder.build();
+  }
 }

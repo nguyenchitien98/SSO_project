@@ -13,5 +13,4 @@ import org.springframework.stereotype.Repository;
  * @since Sprint 02
  */
 @Repository
-public interface OauthClientRepository extends JpaRepository<OauthClient, String> {
-}
+public interface OauthClientRepository extends JpaRepository<OauthClient, String> {}

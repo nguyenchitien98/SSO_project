@@ -107,13 +107,13 @@ GET  /oauth2/authorize                   → Authorization endpoint
 **Mục tiêu:** Hoàn thiện API quản trị User, Role, Permission cho SSO Server.
 
 **Tasks:**
-- `[ ]` Implement `UserEntity.java` với các fields:
+- `[x]` Implement `UserEntity.java` với các fields:
   ```java
   id (UUID), username, email, passwordHash, firstName, lastName,
   enabled, locked, createdAt, updatedAt, lastLoginAt
   ```
-- `[ ]` Implement `RoleEntity.java` và `PermissionEntity.java` với ManyToMany relationship
-- `[ ]` Implement `AdminUserController.java`:
+- `[x]` Implement `RoleEntity.java` và `PermissionEntity.java` với ManyToMany relationship
+- `[x]` Implement `AdminUserController.java`:
   - `POST /admin/users` — Tạo user mới (chỉ ADMIN)
   - `GET /admin/users` — Danh sách users có phân trang
   - `GET /admin/users/{id}` — Chi tiết user
@@ -121,12 +121,12 @@ GET  /oauth2/authorize                   → Authorization endpoint
   - `PUT /admin/users/{id}/status` — Enable/Disable user
   - `POST /admin/users/{id}/roles` — Gán roles
   - `DELETE /admin/users/{id}/roles/{roleId}` — Thu hồi role
-- `[ ]` Implement `AdminRoleController.java`:
+- `[x]` Implement `AdminRoleController.java`:
   - `POST /admin/roles` — Tạo role mới
   - `GET /admin/roles` — Danh sách roles
   - `POST /admin/roles/{id}/permissions` — Gán permissions
-- `[ ]` Bảo mật tất cả `/admin/*` endpoints: chỉ ADMIN service account được phép gọi (Client Credentials)
-- `[ ]` Viết Unit Test cho UserService và RoleService (Mockito)
+- `[x]` Bảo mật tất cả `/admin/*` endpoints: chỉ ADMIN service account được phép gọi (Client Credentials)
+- `[x]` Viết Unit Test cho UserService và RoleService (Mockito)
 
 **Definition of Done:** CRUD User/Role/Permission API hoạt động, có Javadoc đầy đủ tiếng Việt.
 

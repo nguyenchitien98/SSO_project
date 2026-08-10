@@ -17,19 +17,19 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-    /**
-     * Tìm kiếm người dùng dựa trên username đăng nhập.
-     *
-     * @param username Tên đăng nhập cần tìm
-     * @return User tương ứng bọc trong Optional
-     */
-    Optional<User> findByUsername(String username);
+  /**
+   * Tìm kiếm người dùng dựa trên username đăng nhập.
+   *
+   * @param username Tên đăng nhập cần tìm
+   * @return User tương ứng bọc trong Optional
+   */
+  Optional<User> findByUsername(String username);
 
-    /**
-     * Tìm kiếm người dùng dựa trên email đăng ký.
-     *
-     * @param email Địa chỉ email cần tìm
-     * @return User tương ứng bọc trong Optional
-     */
-    Optional<User> findByEmail(String email);
+  /**
+   * Tìm kiếm người dùng dựa trên email đăng ký.
+   *
+   * @param email Địa chỉ email cần tìm
+   * @return User tương ứng bọc trong Optional
+   */
+  Optional<User> findByEmail(String email);
 }

@@ -7,11 +7,11 @@ import java.util.UUID;
 /**
  * Sự kiện thông báo khi giao dịch thanh toán của đơn hàng được xử lý hoàn tất.
  *
- * <p>Được publish bởi payment-service sử dụng Outbox Pattern.
- * Được consume bởi:
+ * <p>Được publish bởi payment-service sử dụng Outbox Pattern. Được consume bởi:
+ *
  * <ul>
- *   <li>order-service: Để chuyển trạng thái đơn hàng từ PENDING sang CONFIRMED.</li>
- *   <li>notification-service: Gửi thông báo thanh toán thành công/hóa đơn cho khách hàng.</li>
+ *   <li>order-service: Để chuyển trạng thái đơn hàng từ PENDING sang CONFIRMED.
+ *   <li>notification-service: Gửi thông báo thanh toán thành công/hóa đơn cho khách hàng.
  * </ul>
  *
  * @param eventId Định danh sự kiện duy nhất (UUID)
@@ -26,12 +26,11 @@ import java.util.UUID;
  * @since Sprint 01
  */
 public record PaymentCompletedEvent(
-        UUID eventId,
-        Long paymentId,
-        Long orderId,
-        UUID userId,
-        BigDecimal amount,
-        String status,
-        String transactionRef,
-        Instant completedAt
-) {}
+    UUID eventId,
+    Long paymentId,
+    Long orderId,
+    UUID userId,
+    BigDecimal amount,
+    String status,
+    String transactionRef,
+    Instant completedAt) {}
