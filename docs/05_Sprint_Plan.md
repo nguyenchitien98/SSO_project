@@ -428,55 +428,55 @@ monolith-frontend/
 ```
 
 **Tasks:**
-- `[ ]` Khởi tạo project: `npm create vite@latest monolith-frontend -- --template react-ts`
+- `[x]` Khởi tạo project: `npm create vite@latest monolith-frontend -- --template react-ts`
   - Cài dependencies: `react-router-dom`, `@types/node`
   - Cấu hình Vite proxy: `/api/**` → `http://localhost:8080`
   - Cấu hình absolute imports: `@/` alias
-- `[ ]` Implement `src/auth/pkce.ts`:
+- `[x]` Implement `src/auth/pkce.ts`:
   - `generateCodeVerifier()`: 128 byte random string, base64url encoded
   - `generateCodeChallenge(verifier)`: SHA-256 hash, base64url encoded
-- `[ ]` Implement `src/auth/oauth.ts`:
+- `[x]` Implement `src/auth/oauth.ts`:
   - `buildAuthorizeUrl(state, codeChallenge)`: tạo URL redirect sang SSO
   - `exchangeCode(code, codeVerifier)`: POST `/oauth2/token` lấy tokens
   - `refreshAccessToken(refreshToken)`: đổi refresh token lấy access token mới
   - `revokeToken(token)`: POST `/oauth2/revoke` khi logout
-- `[ ]` Implement `src/auth/AuthContext.tsx`:
+- `[x]` Implement `src/auth/AuthContext.tsx`:
   - Lưu `accessToken`, `refreshToken`, `userInfo` (decode từ JWT payload)
   - Auto refresh khi token sắp hết hạn (silent renew trước 60 giây)
   - `useAuth()` hook export ra `{ user, login, logout, hasPermission }`
-- `[ ]` Implement `src/styles/globals.css` (Design Tokens)
+- `[x]` Implement `src/styles/globals.css` (Design Tokens)
   - Dark theme: bg `#09090b`, brand `#6366f1`, accent `#8b5cf6`
   - Typography: Inter font (Google Fonts)
-- `[ ]` Implement **Layout Components** (CSS Modules):
+- `[x]` Implement **Layout Components** (CSS Modules):
   - `Sidebar.tsx`: Navigation links ẩn/hiện theo role
   - `Header.tsx`: Avatar, tên user, role badge, nút Logout
   - `ProtectedRoute.tsx`: Redirect về `/login` nếu chưa auth
-- `[ ]` Implement **LoginPage** (`/login`):
+- `[x]` Implement **LoginPage** (`/login`):
   - Màn hình Welcome với logo SSO Platform
   - Nút "Đăng nhập qua SSO" → gọi `oauth.buildAuthorizeUrl()` → redirect
-- `[ ]` Implement **CallbackPage** (`/callback`):
+- `[x]` Implement **CallbackPage** (`/callback`):
   - Đọc `?code=` và `?state=` từ URL
   - Validate state chống CSRF
   - Gọi `oauth.exchangeCode()` → lưu tokens → redirect về `/dashboard`
-- `[ ]` Implement **Product Module**:
+- `[x]` Implement **Product Module**:
   - `ProductListPage`: Bảng danh sách, phân trang, filter theo category
   - `ProductDetailPage`: Chi tiết sản phẩm, ảnh, giá, số lượng tồn kho
   - `ProductFormPage`: Form tạo/sửa — chỉ hiện với PRODUCT_CREATE/UPDATE permission
   - Nút "Xóa" chỉ hiện với ADMIN/MANAGER
-- `[ ]` Implement **Order Module**:
+- `[x]` Implement **Order Module**:
   - `CheckoutPage`: Chọn sản phẩm, nhập địa chỉ, gửi kèm `Idempotency-Key` UUID
   - `OrderListPage`: ADMIN thấy tất cả đơn, USER chỉ thấy của mình
   - `OrderDetailPage`: Chi tiết + nút "Hủy đơn" nếu status PENDING
-- `[ ]` Implement **Profile Page** (`/profile`):
+- `[x]` Implement **Profile Page** (`/profile`):
   - Hiển thị thông tin, role badge
   - Form đổi mật khẩu (gọi `POST /auth/change-password` trên SSO Server)
-- `[ ]` Implement **Admin Module** (chỉ ADMIN thấy trong Sidebar):
+- `[x]` Implement **Admin Module** (chỉ ADMIN thấy trong Sidebar):
   - `AdminUsersPage`: Bảng user, nút Enable/Disable, nút Gán Role
   - `AuditLogPage`: Bảng audit log, filter theo actor, action, date range
-- `[ ]` Xử lý **Token Expiry & Auto-refresh**:
+- `[x]` Xử lý **Token Expiry & Auto-refresh**:
   - Interceptor trong `apiClient.ts`: nếu 401 → thử refresh → retry request
   - Nếu refresh thất bại → logout + redirect `/login`
-- `[ ]` **E2E Test với Playwright** (sau khi có UI):
+- `[x]` **E2E Test với Playwright** (sau khi có UI):
   - `tests/happy-path.spec.ts`: Login → Xem sản phẩm → Checkout → Xem đơn hàng → Logout
   - Cấu hình `playwright.config.ts` cho môi trường dev local
 
