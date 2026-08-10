@@ -48,6 +48,16 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
+  /** Bắt lỗi phân quyền Spring Security AccessDeniedException và trả về HTTP 403 Forbidden. */
+  @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+  public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(
+      org.springframework.security.access.AccessDeniedException ex) {
+    log.warn("Lỗi phân quyền truy cập chéo: {}", ex.getMessage());
+    ApiResponse<Void> response =
+        ApiResponse.error(ErrorCode.FORBIDDEN, "Không có quyền thực hiện hành động này");
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+  }
+
   /** Bắt các lỗi hệ thống không mong muốn còn lại. */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {

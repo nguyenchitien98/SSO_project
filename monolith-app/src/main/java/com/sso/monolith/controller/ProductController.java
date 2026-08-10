@@ -46,7 +46,7 @@ public class ProductController {
 
   /** API chi tiết sản phẩm theo ID. */
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable Long id) {
+  public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable("id") Long id) {
     log.info("API GET /api/products/{} - Lấy chi tiết sản phẩm", id);
     ProductResponse product = productService.getProductById(id);
     return ResponseEntity.ok(ApiResponse.success(product));
@@ -72,7 +72,7 @@ public class ProductController {
   /** API cập nhật thông tin sản phẩm. */
   @PutMapping("/{id}")
   public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
-      @PathVariable Long id, @Valid @RequestBody UpdateProductRequest request) {
+      @PathVariable("id") Long id, @Valid @RequestBody UpdateProductRequest request) {
 
     log.info("API PUT /api/products/{} - Yêu cầu cập nhật sản phẩm", id);
     ProductResponse response = productService.updateProduct(id, request);
@@ -81,7 +81,7 @@ public class ProductController {
 
   /** API xóa vật lý sản phẩm khỏi hệ thống. */
   @DeleteMapping("/{id}")
-  public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
+  public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable("id") Long id) {
     log.warn("API DELETE /api/products/{} - Yêu cầu xóa sản phẩm", id);
     productService.deleteProduct(id);
     return ResponseEntity.ok(ApiResponse.success("Xóa sản phẩm thành công", null));

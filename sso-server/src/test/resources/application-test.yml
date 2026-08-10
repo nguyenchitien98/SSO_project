@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:sso_db;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false # Tắt Flyway Migration cho kiểm thử độc lập in-memory
+
+  session:
+    store-type: none # Tắt Spring Session Redis cho kiểm thử độc lập
+
+  data:
+    redis:
+      repositories:
+        enabled: false

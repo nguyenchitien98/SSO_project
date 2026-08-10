@@ -48,7 +48,7 @@ public class OrderController {
 
   /** API chi tiết đơn hàng. */
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<OrderResponse>> getOrderById(@PathVariable Long id) {
+  public ResponseEntity<ApiResponse<OrderResponse>> getOrderById(@PathVariable("id") Long id) {
     log.info("API GET /api/orders/{} - Lấy chi tiết đơn hàng", id);
     OrderResponse response = orderService.getOrderById(id);
     return ResponseEntity.ok(ApiResponse.success(response));
@@ -93,7 +93,7 @@ public class OrderController {
 
   /** API hủy đơn hàng. */
   @PostMapping("/{id}/cancel")
-  public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(@PathVariable Long id) {
+  public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(@PathVariable("id") Long id) {
     log.warn("API POST /api/orders/{}/cancel - Yêu cầu hủy đơn hàng", id);
     OrderResponse response = orderService.cancelOrder(id);
     return ResponseEntity.ok(ApiResponse.success("Hủy đơn hàng thành công", response));
