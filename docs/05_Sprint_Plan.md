@@ -7,12 +7,14 @@ Tài liệu này là chỉ mục tổng hợp lộ trình **25 Sprint** của d�
 ## 🗺️ Bản Đồ Lộ Trình Tổng Thể
 
 ```
-Phase 0 — Foundation & Infrastructure    (Sprint 00-01)
-Phase 1 — SSO Server Core               (Sprint 02-05)
-Phase 2 — Monolith App                  (Sprint 06-10)
-Phase 3 — Microservice App              (Sprint 11-17)
-Phase 4 — Security Hardening & Testing  (Sprint 18-21)
-Phase 5 — Observability & Production    (Sprint 22-25)
+Phase 0   — Foundation & Infrastructure          (Sprint 00-01)
+Phase 1   — SSO Server Core                      (Sprint 02-05)
+Phase 2   — Monolith App (Backend)               (Sprint 06-10)
+Phase 2.5 — Monolith Frontend (React.js + Vite)  (Sprint 10.5)  ← MỚI
+Phase 2.6 — Microservice Frontend (Next.js 15)   (Sprint 10.6)  ← MỚI
+Phase 3   — Microservice App (Backend)           (Sprint 11-17)
+Phase 4   — Security Hardening & Testing         (Sprint 18-21)
+Phase 5   — Observability & Production           (Sprint 22-25)
 ```
 
 ---
@@ -206,7 +208,7 @@ GET  /oauth2/authorize                   → Authorization endpoint
 - `[x]` Cấu hình Spring Security Resource Server OIDC & Jwt validation chéo.
 - `[x]` Viết Unit Test cho JWT converter class.
 
-**Definition of Done:** `GET /api/users/me` trả về profile thành công. Dự án Next.js khởi tạo chạy được, có thể đăng nhập/đăng xuất qua SSO Server và hiển thị trang Dashboard Shell trống.
+**Definition of Done:** `GET /api/users/me` trả về profile thành công. CORS cho `http://localhost:3000` (Monolith Frontend) và `http://localhost:3001` (Microservice Frontend) được cấu hình chính xác. Unit test JWT converter pass.
 
 ---
 
@@ -239,7 +241,7 @@ GET  /oauth2/authorize                   → Authorization endpoint
 - `[x]` Cấu hình H2 Database độc lập cho các integration/security tests.
 - `[x]` Triển khai Request/Response validation chặt chẽ cho Product APIs.
 
-**Definition of Done:** Tất cả unit test backend pass. Giao diện xem danh sách và chi tiết sản phẩm hoạt động. Giao diện CRUD sản phẩm phân quyền chính xác theo permissions của user đăng nhập.
+**Definition of Done:** Tất cả unit test backend pass. `@PreAuthorize` hoạt động chính xác: USER → 403 khi tạo/xóa sản phẩm, ADMIN → 200. API response đúng format `ApiResponse<T>`.
 
 ---
 
@@ -290,7 +292,7 @@ GET  /oauth2/authorize                   → Authorization endpoint
 - `[x]` Triển khai SpEL parameter mapping bằng annotation `@P("orderId")` để đảm bảo tương thích chéo an toàn.
 - `[x]` Triển khai cấu trúc dọn dẹp H2 DB theo thứ tự ràng buộc khóa ngoại chéo giữa các integration tests.
 
-**Definition of Done:** USER không thể xem đơn hàng của người khác. ADMIN có thể xem tất cả. Integration test pass. Giao diện Đơn hàng và Checkout hoạt động đúng phân quyền.
+**Definition of Done:** USER không thể xem đơn hàng của người khác → 403. ADMIN có thể xem tất cả. Idempotency Key chống duplicate order. Integration test pass.
 
 ---
 
@@ -324,26 +326,310 @@ GET  /oauth2/authorize                   → Authorization endpoint
 - `[x]` Triển khai MockMvc HTTPS simulation (`.secure(true)`) để kiểm tra HSTS headers chính xác.
 - `[x]` Triển khai cơ chế lấy `@Auditable` annotation động qua reflection chéo tránh lỗi JoinPointMatch parameter binding.
 
-**Definition of Done:** Tất cả security tests pass. Audit logs được ghi đầy đủ. Trang quản lý User và xem Audit Log trên Frontend hoạt động đúng phân quyền.
+**Definition of Done:** Tất cả security tests pass. Audit logs được ghi đầy đủ với đầy đủ thông tin actor, action, entity, IP. Security headers được inject vào tất cả response.
 
 ---
 
 ### Sprint 10 — Monolith Complete Integration Test
-**Mục tiêu:** Integration test end-to-end cho toàn bộ Monolith.
+**Mục tiêu:** Integration test end-to-end cho toàn bộ Monolith Backend.
 
 **Tasks:**
-- `[ ]` Setup Testcontainers cho PostgreSQL và Redis
-- `[ ]` Viết Integration Test scenarios:
-  - Scenario 1 — Happy path: LOGIN → GET /products → POST /orders → GET /orders/{id}
-  - Scenario 2 — Auth failure: Expired JWT → 401
-  - Scenario 3 — Authorization failure: USER → DELETE /products → 403
-  - Scenario 4 — Ownership violation: USER A → GET /orders/{orderId of User B} → 403
-  - Scenario 5 — Brute force: 6 login attempts → account locked → 429
+- `[x]` Setup H2 in-memory database (PostgreSQL mode) cho Integration Test (không cần Docker)
+- `[x]` Viết `MonolithCompleteIntegrationTest.java` với các scenarios:
+  - Scenario 1 — Happy path: JWT hợp lệ → GET /products → POST /orders → GET /orders/{id} thành công
+  - Scenario 2 — Auth failure: JWT hết hạn → 401 Unauthorized
+  - Scenario 3 — Authorization failure: USER role → DELETE /products → 403 Forbidden
+  - Scenario 4 — Ownership violation: USER A → GET /orders/{orderId of User B} → 403 Forbidden
+- `[x]` Viết `SsoBruteForceIntegrationTest.java`:
+  - Scenario 5 — Brute force: 6 lần login sai → account locked tạm thời → 10 lần → locked vĩnh viễn
 - `[ ]` Load test nhỏ với k6: 100 concurrent users, 60 seconds → P99 < 500ms
-- `[ ]` Cài đặt và cấu hình thư viện kiểm thử giao diện E2E (Playwright hoặc Cypress) cho Next.js App
-- `[ ]` Viết luồng kiểm thử giao diện tự động (E2E Test) bao phủ luồng đi đầy đủ (Happy path E2E): Login -> Mua hàng -> Checkout -> Xem đơn hàng -> Đổi mật khẩu -> Logout
+  - Viết script `monolith-app/src/test/resources/k6/monolith-load-test.js`
 
-**Definition of Done:** Tất cả Integration Test backend pass. E2E Test trên UI chạy thành công hoàn toàn không có lỗi hiển thị/chức năng. Monolith app & UI production-ready.
+**Definition of Done:** Tất cả 5 Integration Test scenarios backend pass (`BUILD SUCCESS`). k6 load test script sẵn sàng.
+
+---
+
+## Phase 2.5: Monolith Frontend — React.js + Vite (Sprint 10.5)
+
+### Sprint 10.5 — Monolith Frontend Bootstrap & OAuth2 PKCE Login
+**Mục tiêu:** Khởi tạo ứng dụng React.js SPA, implement luồng OAuth2 Authorization Code + PKCE để đăng nhập qua SSO Server.
+
+**Tại sao React.js (không Next.js)?**
+- Monolith là ứng dụng **Client-Side Rendered (SPA)** — không cần SSR vì Monolith Backend đã xử lý data
+- Học cách tự implement PKCE flow từ đầu (giá trị học tập cao hơn)
+- Vite cho hot reload nhanh, bundle nhỏ
+
+**Cơ chế SSO Login cho React SPA:**
+```
+1. User bấm "Đăng nhập" → Frontend generate code_verifier + code_challenge (SHA-256)
+2. Redirect sang: http://sso-server:9000/oauth2/authorize
+      ?client_id=monolith-web
+      &response_type=code
+      &redirect_uri=http://localhost:3000/callback
+      &scope=openid profile email
+      &code_challenge=BASE64URL(SHA256(code_verifier))
+      &code_challenge_method=S256
+      &state=random_csrf_token
+3. User thấy trang Login tùy chỉnh của SSO Server → nhập username/password
+4. SSO redirect về: http://localhost:3000/callback?code=AUTH_CODE&state=xxx
+5. React /callback page gọi POST /oauth2/token với code + code_verifier
+6. Nhận: { access_token, refresh_token, expires_in } → lưu vào sessionStorage
+7. Gọi API Monolith với header: Authorization: Bearer {access_token}
+```
+
+**Cấu trúc project:**
+```
+monolith-frontend/
+├── src/
+│   ├── auth/
+│   │   ├── pkce.ts           # generate code_verifier, code_challenge
+│   │   ├── oauth.ts          # buildAuthorizeUrl, exchangeCode, refreshToken
+│   │   └── AuthContext.tsx   # React Context lưu token + user info
+│   ├── components/
+│   │   ├── common/           # Button, Input, Modal, Badge, Table, Skeleton
+│   │   └── layout/           # Sidebar, Header, DashboardLayout, ProtectedRoute
+│   ├── pages/
+│   │   ├── LoginPage.tsx
+│   │   ├── CallbackPage.tsx
+│   │   ├── DashboardPage.tsx
+│   │   ├── products/
+│   │   │   ├── ProductListPage.tsx
+│   │   │   ├── ProductDetailPage.tsx
+│   │   │   └── ProductFormPage.tsx
+│   │   ├── orders/
+│   │   │   ├── OrderListPage.tsx
+│   │   │   ├── OrderDetailPage.tsx
+│   │   │   └── CheckoutPage.tsx
+│   │   ├── ProfilePage.tsx
+│   │   └── admin/
+│   │       ├── AdminUsersPage.tsx
+│   │       └── AuditLogPage.tsx
+│   ├── services/
+│   │   ├── apiClient.ts      # fetch wrapper với auto Bearer token
+│   │   ├── productApi.ts
+│   │   ├── orderApi.ts
+│   │   └── userApi.ts
+│   ├── hooks/
+│   │   ├── useAuth.ts        # access token, user info, logout
+│   │   └── usePermission.ts  # check permission từ JWT claims
+│   ├── types/
+│   │   ├── api.ts            # ApiResponse<T>, PageResponse<T>
+│   │   ├── auth.ts           # TokenResponse, UserInfo
+│   │   ├── product.ts
+│   │   └── order.ts
+│   ├── styles/
+│   │   └── globals.css       # CSS Variables (dark theme)
+│   ├── App.tsx               # React Router setup
+│   └── main.tsx
+├── index.html
+├── vite.config.ts            # proxy /api → http://localhost:8080
+├── tsconfig.json
+└── package.json
+```
+
+**Tasks:**
+- `[ ]` Khởi tạo project: `npm create vite@latest monolith-frontend -- --template react-ts`
+  - Cài dependencies: `react-router-dom`, `@types/node`
+  - Cấu hình Vite proxy: `/api/**` → `http://localhost:8080`
+  - Cấu hình absolute imports: `@/` alias
+- `[ ]` Implement `src/auth/pkce.ts`:
+  - `generateCodeVerifier()`: 128 byte random string, base64url encoded
+  - `generateCodeChallenge(verifier)`: SHA-256 hash, base64url encoded
+- `[ ]` Implement `src/auth/oauth.ts`:
+  - `buildAuthorizeUrl(state, codeChallenge)`: tạo URL redirect sang SSO
+  - `exchangeCode(code, codeVerifier)`: POST `/oauth2/token` lấy tokens
+  - `refreshAccessToken(refreshToken)`: đổi refresh token lấy access token mới
+  - `revokeToken(token)`: POST `/oauth2/revoke` khi logout
+- `[ ]` Implement `src/auth/AuthContext.tsx`:
+  - Lưu `accessToken`, `refreshToken`, `userInfo` (decode từ JWT payload)
+  - Auto refresh khi token sắp hết hạn (silent renew trước 60 giây)
+  - `useAuth()` hook export ra `{ user, login, logout, hasPermission }`
+- `[ ]` Implement `src/styles/globals.css` (Design Tokens)
+  - Dark theme: bg `#09090b`, brand `#6366f1`, accent `#8b5cf6`
+  - Typography: Inter font (Google Fonts)
+- `[ ]` Implement **Layout Components** (CSS Modules):
+  - `Sidebar.tsx`: Navigation links ẩn/hiện theo role
+  - `Header.tsx`: Avatar, tên user, role badge, nút Logout
+  - `ProtectedRoute.tsx`: Redirect về `/login` nếu chưa auth
+- `[ ]` Implement **LoginPage** (`/login`):
+  - Màn hình Welcome với logo SSO Platform
+  - Nút "Đăng nhập qua SSO" → gọi `oauth.buildAuthorizeUrl()` → redirect
+- `[ ]` Implement **CallbackPage** (`/callback`):
+  - Đọc `?code=` và `?state=` từ URL
+  - Validate state chống CSRF
+  - Gọi `oauth.exchangeCode()` → lưu tokens → redirect về `/dashboard`
+- `[ ]` Implement **Product Module**:
+  - `ProductListPage`: Bảng danh sách, phân trang, filter theo category
+  - `ProductDetailPage`: Chi tiết sản phẩm, ảnh, giá, số lượng tồn kho
+  - `ProductFormPage`: Form tạo/sửa — chỉ hiện với PRODUCT_CREATE/UPDATE permission
+  - Nút "Xóa" chỉ hiện với ADMIN/MANAGER
+- `[ ]` Implement **Order Module**:
+  - `CheckoutPage`: Chọn sản phẩm, nhập địa chỉ, gửi kèm `Idempotency-Key` UUID
+  - `OrderListPage`: ADMIN thấy tất cả đơn, USER chỉ thấy của mình
+  - `OrderDetailPage`: Chi tiết + nút "Hủy đơn" nếu status PENDING
+- `[ ]` Implement **Profile Page** (`/profile`):
+  - Hiển thị thông tin, role badge
+  - Form đổi mật khẩu (gọi `POST /auth/change-password` trên SSO Server)
+- `[ ]` Implement **Admin Module** (chỉ ADMIN thấy trong Sidebar):
+  - `AdminUsersPage`: Bảng user, nút Enable/Disable, nút Gán Role
+  - `AuditLogPage`: Bảng audit log, filter theo actor, action, date range
+- `[ ]` Xử lý **Token Expiry & Auto-refresh**:
+  - Interceptor trong `apiClient.ts`: nếu 401 → thử refresh → retry request
+  - Nếu refresh thất bại → logout + redirect `/login`
+- `[ ]` **E2E Test với Playwright** (sau khi có UI):
+  - `tests/happy-path.spec.ts`: Login → Xem sản phẩm → Checkout → Xem đơn hàng → Logout
+  - Cấu hình `playwright.config.ts` cho môi trường dev local
+
+**Definition of Done:** User bấm Đăng nhập → redirect SSO → nhập pass → về Dashboard hiển thị đúng tên/role. Products/Orders render đúng dữ liệu. Nút CRUD hiển thị/ẩn đúng permission. Logout hoạt động, revoke token. Playwright E2E happy path pass.
+
+---
+
+## Phase 2.6: Microservice Frontend — Next.js 15 + NextAuth.js (Sprint 10.6)
+
+### Sprint 10.6 — Microservice Frontend Bootstrap & NextAuth SSO Integration
+**Mục tiêu:** Khởi tạo ứng dụng Next.js 15 (App Router, RSC), tích hợp NextAuth.js v5 để đăng nhập qua SSO Server tự động, xây dựng UI đầy đủ cho Microservice App.
+
+**Tại sao Next.js 15 (không React)?**
+- Microservice App phức tạp hơn — cần **Server-Side Rendering** cho SEO và performance
+- **React Server Components (RSC)** fetch data ở server → không lộ token ra browser
+- **NextAuth.js v5** xử lý toàn bộ OAuth2 flow + token rotation tự động
+- Phù hợp với production-grade app (không phải prototype)
+
+**Cơ chế SSO Login với NextAuth.js:**
+```
+1. User vào /dashboard → middleware kiểm tra session → chưa có → redirect /login
+2. User bấm "Đăng nhập" → gọi signIn('sso-server') của NextAuth
+3. NextAuth tự động:
+   a. Generate PKCE code_verifier, code_challenge
+   b. Redirect sang SSO Server /oauth2/authorize
+   c. Sau khi login, SSO redirect về /api/auth/callback/sso-server
+   d. NextAuth exchange code → lấy tokens
+   e. Lưu tokens vào HTTP-only cookie (XSS-safe)
+   f. Redirect về /dashboard
+4. Server Components đọc session từ cookie (server-side) → fetch API Gateway
+5. Client Components dùng useSession() hook
+6. Token sắp hết hạn → NextAuth tự động refresh (jwt callback)
+```
+
+**Cấu trúc project:**
+```
+microservice-frontend/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx              # Root layout (SessionProvider, fonts)
+│   │   ├── page.tsx                # Landing → redirect to /dashboard
+│   │   ├── (auth)/
+│   │   │   └── login/
+│   │   │       └── page.tsx        # Trang Login: nút "Đăng nhập qua SSO"
+│   │   ├── (dashboard)/
+│   │   │   ├── layout.tsx          # RSC: kiểm tra session, render Sidebar+Header
+│   │   │   ├── page.tsx            # Dashboard overview
+│   │   │   ├── products/
+│   │   │   │   ├── page.tsx        # RSC: fetch /api/products từ Gateway
+│   │   │   │   ├── new/page.tsx    # Client: form tạo sản phẩm
+│   │   │   │   └── [id]/page.tsx   # RSC: chi tiết sản phẩm
+│   │   │   ├── orders/
+│   │   │   │   ├── page.tsx        # RSC: danh sách đơn hàng
+│   │   │   │   ├── new/page.tsx    # Client: checkout form
+│   │   │   │   └── [id]/page.tsx   # RSC: chi tiết đơn hàng
+│   │   │   ├── profile/
+│   │   │   │   └── page.tsx        # Client: profile + avatar + 2FA setup
+│   │   │   └── admin/
+│   │   │       ├── users/page.tsx  # RSC: danh sách users (ADMIN only)
+│   │   │       ├── services/page.tsx # RSC: Eureka health dashboard
+│   │   │       └── reports/page.tsx  # Client: biểu đồ doanh thu (Chart.js)
+│   │   └── api/
+│   │       └── auth/
+│   │           └── [...nextauth]/
+│   │               └── route.ts    # NextAuth API handler
+│   ├── auth.ts                     # NextAuth config (SSO provider, callbacks)
+│   ├── middleware.ts               # Bảo vệ routes: check session
+│   ├── components/
+│   │   ├── common/                 # Button, Input, Modal, Badge, Table, Skeleton
+│   │   └── layout/                 # Sidebar, Header, DashboardShell
+│   ├── lib/
+│   │   ├── api/
+│   │   │   ├── client.ts           # fetch wrapper (server-side dùng token)
+│   │   │   ├── products.ts
+│   │   │   ├── orders.ts
+│   │   │   └── users.ts
+│   │   └── utils.ts
+│   ├── types/
+│   │   ├── api.ts
+│   │   ├── auth.ts                 # Session, CurrentUser
+│   │   ├── product.ts
+│   │   └── order.ts
+│   └── styles/
+│       └── globals.css             # CSS Variables (dark theme)
+├── next.config.ts
+├── .env.local                      # gitignored
+├── .env.example                    # committed
+├── tsconfig.json
+└── package.json
+```
+
+**Tasks:**
+- `[ ]` Khởi tạo project:
+  ```bash
+  npx create-next-app@latest microservice-frontend \
+    --typescript --app --src-dir --no-tailwind --import-alias "@/*"
+  ```
+  - Cài dependencies: `next-auth@beta`, `chart.js`, `react-chartjs-2`
+- `[ ]` Cấu hình `.env.local` và `.env.example`:
+  ```env
+  AUTH_SECRET=          # openssl rand -base64 32
+  AUTH_ISSUER=http://sso-server:9000
+  AUTH_CLIENT_ID=microservice-gateway
+  AUTH_CLIENT_SECRET=
+  NEXT_PUBLIC_API_URL=http://localhost:8090
+  ```
+- `[ ]` Implement `src/auth.ts` — NextAuth v5 config:
+  - Custom OAuth2 Provider trỏ đến SSO Server endpoints
+  - `jwt` callback: lưu `access_token`, `refresh_token`, `expires_at` vào JWT
+  - `session` callback: expose `accessToken` + `user.roles` + `user.permissions` cho client
+  - Auto-refresh: nếu `expires_at < Date.now()` → gọi `/oauth2/token` với `refresh_token`
+- `[ ]` Implement `src/middleware.ts`:
+  - Dùng NextAuth `auth` middleware
+  - Public routes: `/login`, `/api/auth/**`
+  - Protected routes: tất cả còn lại → redirect `/login` nếu chưa auth
+- `[ ]` Implement `src/app/api/auth/[...nextauth]/route.ts`:
+  - NextAuth handler xử lý SSO callback
+- `[ ]` Implement `src/styles/globals.css` (cùng Design Tokens với monolith-frontend)
+- `[ ]` Implement **Layout Components** (CSS Modules):
+  - `Sidebar.tsx`: Server Component đọc session, render nav links theo role
+  - `Header.tsx`: Avatar, tên user, role badge, nút Logout (`signOut()`)
+  - `(dashboard)/layout.tsx`: wrap content với DashboardShell
+- `[ ]` Implement **Login Page** (`/login`):
+  - Màn hình Welcome đồng bộ thương hiệu với Monolith Frontend
+  - Nút "Đăng nhập qua SSO" → `signIn('sso-server')` → NextAuth tự redirect
+- `[ ]` Implement **Product Module** (RSC + Client):
+  - `products/page.tsx` (RSC): fetch từ API Gateway kèm `Authorization: Bearer {serverToken}`
+  - `products/new/page.tsx` (Client): form tạo sản phẩm, submit với `useTransition`
+  - `products/[id]/page.tsx` (RSC): chi tiết sản phẩm
+  - Render nút CRUD dựa trên `session.user.permissions`
+- `[ ]` Implement **Order Module** (RSC + Client):
+  - `orders/new/page.tsx` (Client): Checkout form gửi kèm `Idempotency-Key: crypto.randomUUID()`
+  - `orders/page.tsx` (RSC): danh sách đơn hàng
+  - `orders/[id]/page.tsx` (RSC): chi tiết + nút Hủy
+- `[ ]` Implement **Profile Page** (Client Component):
+  - Hiển thị thông tin user, role badges
+  - Upload avatar: `POST /api/files/upload` (multipart) → MinIO → cập nhật URL
+  - Bật 2FA: gọi `GET /auth/2fa/setup` → nhận QR Code URL → hiển thị modal QR
+  - Nhập OTP 6 số → `POST /auth/2fa/verify` để kích hoạt
+- `[ ]` Implement **Admin Module** (RSC, chỉ ADMIN thấy trong Sidebar):
+  - `admin/users/page.tsx`: Bảng user + phân trang + nút Enable/Disable + Gán Role modal
+  - `admin/services/page.tsx`: Fetch Eureka API → hiển thị danh sách services và health status
+  - `admin/reports/page.tsx` (Client): Chart.js biểu đồ doanh thu theo ngày/tháng
+- `[ ]` Implement **Error Handling UI**:
+  - `error.tsx` (Client): Error boundary hiển thị thông báo thân thiện
+  - Fallback UI khi API Gateway trả 503 (Circuit Breaker OPEN): "Hệ thống đang bận..."
+  - Toast notifications cho success/error actions
+- `[ ]` **E2E Test với Playwright**:
+  - `tests/happy-path.spec.ts`: Login → Xem sản phẩm → Checkout → Xem đơn → Logout
+  - `tests/admin.spec.ts`: Login ADMIN → Xem users → Disable user → Xem audit log
+  - Cấu hình `playwright.config.ts` cho `http://localhost:3001`
+
+**Definition of Done:** User vào `/dashboard` → redirect `/login` → Đăng nhập SSO → về Dashboard. RSC fetch và render đúng dữ liệu từ API Gateway. Token tự động refresh sau 15 phút. Profile + Avatar upload hoạt động. 2FA setup thành công. Admin dashboard hiển thị service health. Playwright E2E happy path pass.
 
 ---
 
@@ -384,10 +670,10 @@ GET  /oauth2/authorize                   → Authorization endpoint
   /api/files/**     → file-service:8096
   ```
 - `[ ]` Implement Rate Limiting: 100 req/min/user (Redis Token Bucket)
-- `[ ]` Cấu hình môi trường Frontend chuyển hướng endpoint API từ Monolith sang API Gateway (:8090)
-- `[ ]` Cập nhật Base Fetch client để tự động đính kèm Access Token trong authorization header khi gọi các API qua Gateway
+- `[ ]` Cấu hình `.env.local` của `microservice-frontend` chuyển hướng `NEXT_PUBLIC_API_URL` sang API Gateway (`:8090`)
+- `[ ]` Cập nhật `apiClient.ts` trong microservice-frontend để tự động đính kèm Access Token từ NextAuth session vào header `Authorization: Bearer`
 
-**Definition of Done:** Request với valid JWT → Gateway inject headers → forward đến service. Invalid JWT → 401. Fake X-User headers từ client → bị strip. Giao diện người dùng Next.js gọi thành công API qua cổng Gateway.
+**Definition of Done:** Request với valid JWT → Gateway inject headers → forward đến service. Invalid JWT → 401. Fake X-User headers từ client → bị strip. microservice-frontend gọi thành công API qua cổng Gateway.
 
 ---
 
@@ -774,11 +1060,46 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 
 ## Tóm Tắt Lộ Trình
 
-| Phase | Sprints | Mục Tiêu Chính |
+| Phase | Sprints | Framework | Mục Tiêu Chính |
+|---|---|---|---|
+| Phase 0 | 00-01 | — | Infrastructure, DB Schema, Common Library |
+| Phase 1 | 02-05 | Spring Authorization Server | SSO Server: OAuth2, OIDC, JWT, RBAC |
+| Phase 2 | 06-10 | Spring Boot + Spring Security | Monolith App: @PreAuthorize, ABAC, Audit Log |
+| **Phase 2.5** | **10.5** | **React.js 18 + Vite + TypeScript** | **Monolith Frontend: PKCE OAuth2, Products, Orders, Admin** |
+| **Phase 2.6** | **10.6** | **Next.js 15 + NextAuth.js v5** | **Microservice Frontend: RSC, SSO auto-login, 2FA, Reports** |
+| Phase 3 | 11-17 | Spring Cloud Gateway + Microservices | Microservice: Gateway, Services, Kafka, Resilience4j |
+| Phase 4 | 18-21 | — | Security Testing, Key Rotation, Distributed Tracing |
+| Phase 5 | 22-25 | Docker + GitLab CI + Kubernetes | Observability, CI/CD, Documentation |
+
+---
+
+## Ghi Chú Thiết Kế Frontend
+
+### Tại sao 2 Framework khác nhau?
+
+| Điểm | Monolith Frontend (React.js) | Microservice Frontend (Next.js) |
 |---|---|---|
-| Phase 0 | 00-01 | Infrastructure, DB Schema, Common Library |
-| Phase 1 | 02-05 | SSO Server: OAuth2, OIDC, JWT, RBAC |
-| Phase 2 | 06-10 | Monolith App: @PreAuthorize, ABAC, Audit |
-| Phase 3 | 11-17 | Microservice: Gateway, Services, Kafka, Resilience |
-| Phase 4 | 18-21 | Security Testing, Key Rotation, Tracing |
-| Phase 5 | 22-25 | Observability, Docker, Documentation |
+| **Rendering** | Client-Side Rendering (SPA) | Server-Side + RSC |
+| **OAuth2 Flow** | Tự implement PKCE (học sâu) | NextAuth.js tự động hóa |
+| **Token Storage** | `sessionStorage` (in-memory) | HTTP-only Cookie (NextAuth) |
+| **API Target** | Monolith `:8080` | API Gateway `:8090` |
+| **Mục đích học** | Hiểu OAuth2 raw flow | Hiểu production SSO pattern |
+
+### Luồng SSO Login tổng quát
+
+```
+Browser                    Frontend App              SSO Server (:9000)
+   │                           │                           │
+   │── bấm "Đăng nhập" ───────>│                           │
+   │                           │── redirect ──────────────>│
+   │                           │   /oauth2/authorize        │
+   │<── SSO Login page ────────────────────────────────────│
+   │── nhập username/password ─────────────────────────────>│
+   │<── redirect với ?code=... ────────────────────────────│
+   │── GET /callback?code=... ─>│                           │
+   │                           │── POST /oauth2/token ─────>│
+   │                           │<── access_token, refresh ──│
+   │<── redirect /dashboard ───│                           │
+   │                           │                           │
+   │── GET /api/products ──────>│── Bearer token ──> Backend│
+```
