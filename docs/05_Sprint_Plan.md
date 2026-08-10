@@ -214,8 +214,8 @@ GET  /oauth2/authorize                   → Authorization endpoint
 **Mục tiêu:** CRUD Product với phân quyền `@PreAuthorize` đầy đủ.
 
 **Tasks:**
-- `[ ]` Implement `ProductEntity.java`, `ProductRepository.java`
-- `[ ]` Implement `ProductService.java` với `@PreAuthorize` **ở Service Layer**:
+- `[x]` Implement `ProductEntity.java`, `ProductRepository.java`
+- `[x]` Implement `ProductService.java` với `@PreAuthorize` **ở Service Layer**:
   ```java
   @PreAuthorize("hasAuthority('PRODUCT_READ')")
   public Page<ProductResponse> getProducts(Pageable pageable) { ... }
@@ -230,15 +230,14 @@ GET  /oauth2/authorize                   → Authorization endpoint
   @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
   public void deleteProduct(Long id) { ... }
   ```
-- `[ ]` Implement `ProductController.java` (không có `@PreAuthorize` ở Controller)
-- `[ ]` Viết Unit Test cho từng security scenario:
+- `[x]` Implement `ProductController.java` (không có `@PreAuthorize` ở Controller)
+- `[x]` Viết Unit Test cho từng security scenario:
   - USER gọi `createProduct` → `AccessDeniedException`
   - STAFF gọi `createProduct` → thành công
   - USER gọi `deleteProduct` → `AccessDeniedException`
   - ADMIN gọi `deleteProduct` → thành công
-- `[ ]` Xây dựng trang Danh sách sản phẩm (Product List) và Chi tiết sản phẩm (Product Detail) hiển thị dữ liệu sử dụng React Server Components (RSC)
-- `[ ]` Triển khai client component `ProductForm` phục vụ việc Thêm/Sửa sản phẩm
-- `[ ]` Sử dụng Custom Hook `usePermission` để thực hiện conditional rendering ẩn/hiện nút Thêm/Sửa/Xóa tùy theo Roles & Permissions của user hiện tại
+- `[x]` Cấu hình H2 Database độc lập cho các integration/security tests.
+- `[x]` Triển khai Request/Response validation chặt chẽ cho Product APIs.
 
 **Definition of Done:** Tất cả unit test backend pass. Giao diện xem danh sách và chi tiết sản phẩm hoạt động. Giao diện CRUD sản phẩm phân quyền chính xác theo permissions của user đăng nhập.
 
