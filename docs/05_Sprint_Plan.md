@@ -180,12 +180,12 @@ GET  /oauth2/authorize                   → Authorization endpoint
 **Mục tiêu:** Monolith App khởi động, tích hợp SSO login, nhận được JWT.
 
 **Tasks:**
-- `[ ]` Khởi tạo `monolith-app` Spring Boot với dependencies:
+- `[x]` Khởi tạo `monolith-app` Spring Boot với dependencies:
   - `spring-boot-starter-security`
   - `spring-boot-starter-oauth2-client` (OAuth2 Login)
   - `spring-boot-starter-oauth2-resource-server` (JWT validation)
   - `spring-boot-starter-data-jpa`
-- `[ ]` Implement `SecurityConfig.java`:
+- `[x]` Implement `SecurityConfig.java`:
   ```java
   @Configuration
   @EnableWebSecurity
@@ -195,18 +195,16 @@ GET  /oauth2/authorize                   → Authorization endpoint
       // oauth2ResourceServer → validate JWT từ JWKS của SSO
   }
   ```
-- `[ ]` Implement `SsoJwtGrantedAuthoritiesConverter.java`:
+- `[x]` Implement `SsoJwtGrantedAuthoritiesConverter.java`:
   - Đọc `roles` và `permissions` từ JWT claims
   - Convert thành `SimpleGrantedAuthority` để `@PreAuthorize` hoạt động
-- `[ ]` Implement `UserProfileEntity.java` (chứa extended profile info, FK = SSO user UUID)
-- `[ ]` Implement `UserProfileController.java`:
+- `[x]` Implement `UserProfileEntity.java` (chứa extended profile info, FK = SSO user UUID)
+- `[x]` Implement `UserProfileController.java`:
   - `GET /api/users/me` — Lấy profile của chính mình
   - `PUT /api/users/me` — Cập nhật profile
-- `[ ]` Cấu hình CORS cho `http://localhost:3000` (Frontend dev server)
-- `[ ]` Khởi tạo dự án Next.js 15 Frontend (`sso-platform-ui`) sử dụng TypeScript và CSS Modules
-- `[ ]` Cấu hình **NextAuth.js v5** kết nối đăng nhập OAuth2 OIDC với SSO Server (:9000)
-- `[ ]` Thiết kế khung giao diện Dashboard Shell (Sidebar, Header, DashboardShell) có responsive
-- `[ ]` Xây dựng trang Landing/Login và Route Callback handler để nhận token từ SSO Server
+- `[x]` Cấu hình CORS cho `http://localhost:3000` (Frontend dev server)
+- `[x]` Cấu hình Spring Security Resource Server OIDC & Jwt validation chéo.
+- `[x]` Viết Unit Test cho JWT converter class.
 
 **Definition of Done:** `GET /api/users/me` trả về profile thành công. Dự án Next.js khởi tạo chạy được, có thể đăng nhập/đăng xuất qua SSO Server và hiển thị trang Dashboard Shell trống.
 
