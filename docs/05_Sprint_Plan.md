@@ -681,9 +681,9 @@ microservice-frontend/
 **Mục tiêu:** Eureka Server + Config Server + skeleton cho 6 microservices, mỗi service đọc X-User headers.
 
 **Tasks:**
-- `[ ]` Khởi tạo Spring Cloud Config Server (`:8888`) quản lý cấu hình tập trung
-- `[ ]` Khởi tạo Eureka Server (`:8761`)
-- `[ ]` Tạo skeleton cho 6 services (user, product, order, payment, notification, file-service):
+- `[x]` Khởi tạo Spring Cloud Config Server (`:8888`) quản lý cấu hình tập trung
+- `[x]` Khởi tạo Eureka Server (`:8761`)
+- `[x]` Tạo skeleton cho 6 services (user, product, order, payment, notification, file-service):
   - `CurrentUserResolver.java`:
     ```java
     /**
@@ -706,7 +706,7 @@ microservice-frontend/
   - `AuthorizationService.java` (dùng chung pattern)
   - `GlobalExceptionHandler.java`
   - `application.yml` (Eureka & Config Server registration, port mapping)
-- `[ ]` Kiểm tra service discovery: tất cả 6 services hiện trên Eureka dashboard
+- `[x]` Kiểm tra service discovery: tất cả 6 services hiện trên Eureka dashboard
 
 **Definition of Done:** Tất cả services khởi động thành công, nhận config từ Config Server và đăng ký với Eureka.
 

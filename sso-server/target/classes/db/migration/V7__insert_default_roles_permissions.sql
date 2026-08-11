@@ -63,7 +63,7 @@ AND p.name IN ('USER_READ','ORDER_READ','PAYMENT_READ');
 -- Default OAuth2 Clients
 INSERT INTO oauth_clients (id, client_name, grant_types, redirect_uris, scopes, require_pkce) VALUES
     ('monolith-web',       'Monolith Web App',    'authorization_code,refresh_token',
-     'http://localhost:8080/login/oauth2/code/sso', 'openid profile email', TRUE),
+     'http://localhost:8080/login/oauth2/code/sso,http://localhost:3000/callback', 'openid profile email', TRUE),
     ('microservice-gateway','Microservice Gateway','authorization_code,refresh_token',
      'http://localhost:3001/callback', 'openid profile email', TRUE),
     ('order-service',      'Order Service',       'client_credentials', NULL, 'payment:write', FALSE),
