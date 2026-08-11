@@ -1,0 +1,27 @@
+spring:
+  config:
+    import: "optional:configserver:"
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:9999/mock-jwks
+
+  cloud:
+    gateway:
+      routes:
+        - id: product-service-test
+          uri: http://localhost:9999
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - StripPrefix=1
+
+eureka:
+  client:
+    enabled: false

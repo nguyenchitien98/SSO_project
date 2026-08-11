@@ -639,8 +639,8 @@ microservice-frontend/
 **Mục tiêu:** API Gateway xác thực JWT từ JWKS của SSO Server, inject trusted headers.
 
 **Tasks:**
-- `[ ]` Khởi tạo `api-gateway` Spring Cloud Gateway app
-- `[ ]` Implement `StripClientHeadersFilter.java`:
+- `[x]` Khởi tạo `api-gateway` Spring Cloud Gateway app
+- `[x]` Implement `StripClientHeadersFilter.java`:
   ```java
   /**
    * Filter QUAN TRỌNG: Strip các X-User-* headers do client gửi lên.
@@ -651,17 +651,17 @@ microservice-frontend/
    */
   public class StripClientHeadersFilter implements GlobalFilter { ... }
   ```
-- `[ ]` Implement `JwtValidationFilter.java`:
+- `[x]` Implement `JwtValidationFilter.java`:
   - Fetch JWKS từ `http://sso-server:9000/oauth2/jwks`
   - Cache JWKS keys (refresh khi nhận `kid` không biết)
   - Validate: signature, expiration, issuer (`iss`), audience (`aud`)
   - Trả về 401 với error JSON nếu invalid
-- `[ ]` Implement `TrustedHeaderInjectionFilter.java`:
+- `[x]` Implement `TrustedHeaderInjectionFilter.java`:
   - Extract `sub` → `X-User-Id`
   - Extract `roles` → `X-User-Roles`
   - Extract `permissions` → `X-User-Permissions`
   - Extract `email` → `X-User-Email`
-- `[ ]` Cấu hình routes trong `application.yml` đi qua Eureka:
+- `[x]` Cấu hình routes trong `application.yml` đi qua Eureka:
   ```yaml
   /api/users/**     → user-service:8091
   /api/products/**  → product-service:8092
@@ -669,9 +669,9 @@ microservice-frontend/
   /api/payments/**  → payment-service:8094
   /api/files/**     → file-service:8096
   ```
-- `[ ]` Implement Rate Limiting: 100 req/min/user (Redis Token Bucket)
-- `[ ]` Cấu hình `.env.local` của `microservice-frontend` chuyển hướng `NEXT_PUBLIC_API_URL` sang API Gateway (`:8090`)
-- `[ ]` Cập nhật `apiClient.ts` trong microservice-frontend để tự động đính kèm Access Token từ NextAuth session vào header `Authorization: Bearer`
+- `[x]` Implement Rate Limiting: 100 req/min/user (Redis Token Bucket)
+- `[x]` Cấu hình `.env.local` của `microservice-frontend` chuyển hướng `NEXT_PUBLIC_API_URL` sang API Gateway (`:8090`)
+- `[x]` Cập nhật `apiClient.ts` trong microservice-frontend để tự động đính kèm Access Token từ NextAuth session vào header `Authorization: Bearer`
 
 **Definition of Done:** Request với valid JWT → Gateway inject headers → forward đến service. Invalid JWT → 401. Fake X-User headers từ client → bị strip. microservice-frontend gọi thành công API qua cổng Gateway.
 
