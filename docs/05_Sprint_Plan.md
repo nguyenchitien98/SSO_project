@@ -569,13 +569,13 @@ microservice-frontend/
 ```
 
 **Tasks:**
-- `[ ]` Khởi tạo project:
+- `[x]` Khởi tạo project:
   ```bash
   npx create-next-app@latest microservice-frontend \
     --typescript --app --src-dir --no-tailwind --import-alias "@/*"
   ```
   - Cài dependencies: `next-auth@beta`, `chart.js`, `react-chartjs-2`
-- `[ ]` Cấu hình `.env.local` và `.env.example`:
+- `[x]` Cấu hình `.env.local` và `.env.example`:
   ```env
   AUTH_SECRET=          # openssl rand -base64 32
   AUTH_ISSUER=http://sso-server:9000
@@ -583,48 +583,48 @@ microservice-frontend/
   AUTH_CLIENT_SECRET=
   NEXT_PUBLIC_API_URL=http://localhost:8090
   ```
-- `[ ]` Implement `src/auth.ts` — NextAuth v5 config:
+- `[x]` Implement `src/auth.ts` — NextAuth v5 config:
   - Custom OAuth2 Provider trỏ đến SSO Server endpoints
   - `jwt` callback: lưu `access_token`, `refresh_token`, `expires_at` vào JWT
   - `session` callback: expose `accessToken` + `user.roles` + `user.permissions` cho client
   - Auto-refresh: nếu `expires_at < Date.now()` → gọi `/oauth2/token` với `refresh_token`
-- `[ ]` Implement `src/middleware.ts`:
+- `[x]` Implement `src/middleware.ts`:
   - Dùng NextAuth `auth` middleware
   - Public routes: `/login`, `/api/auth/**`
   - Protected routes: tất cả còn lại → redirect `/login` nếu chưa auth
-- `[ ]` Implement `src/app/api/auth/[...nextauth]/route.ts`:
+- `[x]` Implement `src/app/api/auth/[...nextauth]/route.ts`:
   - NextAuth handler xử lý SSO callback
-- `[ ]` Implement `src/styles/globals.css` (cùng Design Tokens với monolith-frontend)
-- `[ ]` Implement **Layout Components** (CSS Modules):
+- `[x]` Implement `src/styles/globals.css` (cùng Design Tokens với monolith-frontend)
+- `[x]` Implement **Layout Components** (CSS Modules):
   - `Sidebar.tsx`: Server Component đọc session, render nav links theo role
   - `Header.tsx`: Avatar, tên user, role badge, nút Logout (`signOut()`)
   - `(dashboard)/layout.tsx`: wrap content với DashboardShell
-- `[ ]` Implement **Login Page** (`/login`):
+- `[x]` Implement **Login Page** (`/login`):
   - Màn hình Welcome đồng bộ thương hiệu với Monolith Frontend
   - Nút "Đăng nhập qua SSO" → `signIn('sso-server')` → NextAuth tự redirect
-- `[ ]` Implement **Product Module** (RSC + Client):
+- `[x]` Implement **Product Module** (RSC + Client):
   - `products/page.tsx` (RSC): fetch từ API Gateway kèm `Authorization: Bearer {serverToken}`
   - `products/new/page.tsx` (Client): form tạo sản phẩm, submit với `useTransition`
   - `products/[id]/page.tsx` (RSC): chi tiết sản phẩm
   - Render nút CRUD dựa trên `session.user.permissions`
-- `[ ]` Implement **Order Module** (RSC + Client):
+- `[x]` Implement **Order Module** (RSC + Client):
   - `orders/new/page.tsx` (Client): Checkout form gửi kèm `Idempotency-Key: crypto.randomUUID()`
   - `orders/page.tsx` (RSC): danh sách đơn hàng
   - `orders/[id]/page.tsx` (RSC): chi tiết + nút Hủy
-- `[ ]` Implement **Profile Page** (Client Component):
+- `[x]` Implement **Profile Page** (Client Component):
   - Hiển thị thông tin user, role badges
   - Upload avatar: `POST /api/files/upload` (multipart) → MinIO → cập nhật URL
   - Bật 2FA: gọi `GET /auth/2fa/setup` → nhận QR Code URL → hiển thị modal QR
   - Nhập OTP 6 số → `POST /auth/2fa/verify` để kích hoạt
-- `[ ]` Implement **Admin Module** (RSC, chỉ ADMIN thấy trong Sidebar):
+- `[x]` Implement **Admin Module** (RSC, chỉ ADMIN thấy trong Sidebar):
   - `admin/users/page.tsx`: Bảng user + phân trang + nút Enable/Disable + Gán Role modal
   - `admin/services/page.tsx`: Fetch Eureka API → hiển thị danh sách services và health status
   - `admin/reports/page.tsx` (Client): Chart.js biểu đồ doanh thu theo ngày/tháng
-- `[ ]` Implement **Error Handling UI**:
+- `[x]` Implement **Error Handling UI**:
   - `error.tsx` (Client): Error boundary hiển thị thông báo thân thiện
   - Fallback UI khi API Gateway trả 503 (Circuit Breaker OPEN): "Hệ thống đang bận..."
   - Toast notifications cho success/error actions
-- `[ ]` **E2E Test với Playwright**:
+- `[x]` **E2E Test với Playwright**:
   - `tests/happy-path.spec.ts`: Login → Xem sản phẩm → Checkout → Xem đơn → Logout
   - `tests/admin.spec.ts`: Login ADMIN → Xem users → Disable user → Xem audit log
   - Cấu hình `playwright.config.ts` cho `http://localhost:3001`
