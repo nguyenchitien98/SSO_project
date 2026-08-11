@@ -12,10 +12,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * @author SSO Platform Team
  * @since Sprint 12
  */
-@SpringBootApplication(exclude = {
-    DataSourceAutoConfiguration.class,
-    FlywayAutoConfiguration.class
-})
+@SpringBootApplication
 @EnableDiscoveryClient
 public class ProductApplication {
 

@@ -718,23 +718,23 @@ microservice-frontend/
 **Tasks:**
 
 **User Service (:8091)**
-- `[ ]` `GET /api/users/me` — Trả về profile của current user
-- `[ ]` `PUT /api/users/me` — Cập nhật profile (chỉ của chính mình)
-- `[ ]` `GET /api/users/{id}` — ADMIN/SUPPORT only
-- `[ ]` `PUT /api/users/{id}/status` — Enable/Disable, ADMIN only
+- `[x]` `GET /api/users/me` — Trả về profile của current user
+- `[x]` `PUT /api/users/me` — Cập nhật profile (chỉ của chính mình)
+- `[x]` `GET /api/users/{id}` — ADMIN/SUPPORT only
+- `[x]` `PUT /api/users/{id}/status` — Enable/Disable, ADMIN only
 
 **Product Service (:8092)**
-- `[ ]` `GET /api/products` — Public (không cần auth)
-- `[ ]` `GET /api/products/{id}` — Public
-- `[ ]` `POST /api/products` — `requirePermission(PRODUCT_CREATE)`
-- `[ ]` `PUT /api/products/{id}` — `requirePermission(PRODUCT_UPDATE)`
-- `[ ]` `DELETE /api/products/{id}` — `requireRole(ADMIN)` hoặc `requireRole(MANAGER)`
+- `[x]` `GET /api/products` — Public (không cần auth)
+- `[x]` `GET /api/products/{id}` — Public
+- `[x]` `POST /api/products` — `requirePermission(PRODUCT_CREATE)`
+- `[x]` `PUT /api/products/{id}` — `requirePermission(PRODUCT_UPDATE)`
+- `[x]` `DELETE /api/products/{id}` — `requireRole(ADMIN)` hoặc `requireRole(MANAGER)`
 
 **File Service (:8096) & MinIO Integration**
-- `[ ]` Khởi động MinIO service ở docker-compose.infra.yml
-- `[ ]` Implement API upload file: `POST /api/files/upload` (validate MIME type, size < 5MB)
-- `[ ]` Cấu hình bucket policies và sinh Presigned URLs cho ảnh private
-- `[ ]` Cung cấp public URLs cho avatars và product images
+- `[x]` Khởi động MinIO service ở docker-compose.infra.yml
+- `[x]` Implement API upload file: `POST /api/files/upload` (validate MIME type, size < 5MB)
+- `[x]` Cấu hình bucket policies và sinh Presigned URLs cho ảnh private
+- `[x]` Cung cấp public URLs cho avatars và product images
 
 **Authorization pattern:**
 ```java
@@ -745,9 +745,9 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 }
 ```
 
-- `[ ]` Xây dựng trang cá nhân (Profile Page) hiển thị thông tin và hỗ trợ chỉnh sửa thông tin người dùng
-- `[ ]` Triển khai API tích hợp tải ảnh lên (upload avatar) từ Frontend qua `file-service` lưu vào MinIO, tự động hiển thị ảnh đại diện mới trên Header
-- `[ ]` Thiết kế Modal Setup 2FA: Tạo nút Switch bật 2FA, hiển thị mã QR và trường nhập mã OTP 6 số để kích hoạt 2FA
+- `[x]` Xây dựng trang cá nhân (Profile Page) hiển thị thông tin và hỗ trợ chỉnh sửa thông tin người dùng
+- `[x]` Triển khai API tích hợp tải ảnh lên (upload avatar) từ Frontend qua `file-service` lưu vào MinIO, tự động hiển thị ảnh đại diện mới trên Header
+- `[x]` Thiết kế Modal Setup 2FA: Tạo nút Switch bật 2FA, hiển thị mã QR và trường nhập mã OTP 6 số để kích hoạt 2FA
 
 **Definition of Done:** API hoạt động đúng. USER gọi PRODUCT_CREATE → 403. STAFF gọi → 201. File Upload lên MinIO thành công, trả về URL truy cập được. Giao diện Profile hoạt động, có thể upload avatar và bật 2FA thông qua QR code thành công.
 

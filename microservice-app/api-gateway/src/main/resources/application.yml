@@ -11,7 +11,7 @@ spring:
     gateway:
       routes:
         - id: user-service
-          uri: http://localhost:3001/api/mock # lb://user-service (Will be switched in Sprint 12+)
+          uri: lb://user-service
           predicates:
             - Path=/api/users/**
           filters:
@@ -23,7 +23,7 @@ spring:
                 key-resolver: "#{@userKeyResolver}"
 
         - id: product-service
-          uri: http://localhost:3001/api/mock # lb://product-service
+          uri: lb://product-service
           predicates:
             - Path=/api/products/**
           filters:
@@ -35,7 +35,7 @@ spring:
                 key-resolver: "#{@userKeyResolver}"
 
         - id: order-service
-          uri: http://localhost:3001/api/mock # lb://order-service
+          uri: http://localhost:3001/api/mock # lb://order-service (Will be switched in Sprint 14+)
           predicates:
             - Path=/api/orders/**
           filters:
@@ -59,7 +59,7 @@ spring:
                 key-resolver: "#{@userKeyResolver}"
 
         - id: file-service
-          uri: http://localhost:3001/api/mock # lb://file-service
+          uri: lb://file-service
           predicates:
             - Path=/api/files/**
           filters:
