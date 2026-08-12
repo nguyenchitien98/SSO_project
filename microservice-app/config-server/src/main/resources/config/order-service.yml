@@ -26,3 +26,17 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+  security:
+    oauth2:
+      client:
+        registration:
+          payment-service-client:
+            provider: sso-server
+            client-id: order-service
+            client-secret: admin123  # Plaintext tương ứng với mã băm đã cấu hình ở V13
+            authorization-grant-type: client_credentials
+            scope: payment:write
+        provider:
+          sso-server:
+            token-uri: http://localhost:9000/oauth2/token

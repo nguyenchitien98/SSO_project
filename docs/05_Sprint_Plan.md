@@ -792,7 +792,7 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 **Mục tiêu:** Payment Service với Client Credentials authentication từ Order Service.
 
 **Tasks:**
-- `[ ]` Implement `OrderService → PaymentService` call với OAuth2 Client Credentials:
+- `[x]` Implement `OrderService → PaymentService` call với OAuth2 Client Credentials:
   ```java
   /**
    * Gọi Payment Service bằng Service Access Token (không phải User Token).
@@ -813,13 +813,13 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
       }
   }
   ```
-- `[ ]` Payment Service chỉ cho phép request từ `order-service` client:
+- `[x]` Payment Service chỉ cho phép request từ `order-service` client:
   ```java
   // Validate client_id trong token == "order-service"
   ```
-- `[ ]` Implement Mock Payment: PENDING → COMPLETED (sau 2 giây mock)
-- `[ ]` Implement `POST /api/payments/{id}/refund` — MANAGER hoặc ADMIN only
-- `[ ]` Xây dựng giao diện xem trạng thái hoạt động các microservices (Eureka Dashboard / Instances health check page) dành riêng cho ADMIN
+- `[x]` Implement Mock Payment: PENDING → COMPLETED (sau 2 giây mock)
+- `[x]` Implement `POST /api/payments/{id}/refund` — MANAGER hoặc ADMIN only
+- `[x]` Xây dựng giao diện xem trạng thái hoạt động các microservices (Eureka Dashboard / Instances health check page) dành riêng cho ADMIN
 
 **Definition of Done:** Order Service gọi Payment Service thành công với service token. Direct call từ bên ngoài (user token) → 403. Giao diện quản trị Admin hiển thị đúng danh sách các service đang UP/DOWN từ Eureka API.
 

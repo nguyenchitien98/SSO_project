@@ -3,6 +3,8 @@ package com.sso.order.service;
 import com.sso.common.dto.ApiResponse;
 import com.sso.common.exception.BusinessException;
 import com.sso.common.exception.ErrorCode;
+import com.sso.order.client.PaymentClient;
+import com.sso.order.dto.PaymentRequestDto;
 import com.sso.order.client.ProductClient;
 import com.sso.order.dto.CreateOrderRequest;
 import com.sso.order.dto.ProductDto;
@@ -34,6 +36,7 @@ public class OrderService {
 
   private final OrderRepository orderRepository;
   private final ProductClient productClient;
+  private final PaymentClient paymentClient;
   private final StringRedisTemplate redisTemplate;
 
   private static final String IDEMPOTENCY_PREFIX = "idempotency:order:";
@@ -106,6 +109,17 @@ public class OrderService {
       // Cập nhật trạng thái thành công trong Redis cache
       redisTemplate.opsForValue().set(redisKey, "SUCCESS", 24, TimeUnit.HOURS);
       log.info("Đặt hàng thành công với Code: {}, Idempotency-Key: {}", savedOrder.getOrderCode(), idempotencyKey);
+
+      // Tự động gọi sang Payment Service để xử lý thanh toán bất đồng bộ qua Feign Client
+      try {
+        log.info("[S2S Auth] Thực hiện thanh toán qua Feign Client cho Order ID: {}, Số tiền: {}", savedOrder.getId(), savedOrder.getTotalAmount());
+        paymentClient.requestPayment(new PaymentRequestDto(
+            savedOrder.getId(), savedOrder.getUserId(), savedOrder.getTotalAmount(), "E-WALLET"
+        ));
+      } catch (Exception payEx) {
+        log.error("[S2S Auth] Không thể kết nối tới Payment Service: {}", payEx.getMessage());
+        // Giữ nguyên trạng thái PENDING của đơn hàng để user thanh toán thủ công sau
+      }
 
       return savedOrder;
 
