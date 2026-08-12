@@ -48,7 +48,7 @@ export default function CheckoutPage() {
     const idempotencyKey = crypto.randomUUID();
 
     try {
-      const res = await fetch('/api/mock/orders', {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

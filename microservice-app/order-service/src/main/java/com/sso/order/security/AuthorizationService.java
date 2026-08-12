@@ -33,4 +33,14 @@ public class AuthorizationService {
           "Không có quyền thực hiện hành động này (Thiếu quyền: " + permission + ")");
     }
   }
+
+  public void requireOwnerOrAdmin(CurrentUser user, String resourceUserId) {
+    if (user == null) {
+      throw new BusinessException(ErrorCode.UNAUTHORIZED, "Yêu cầu đăng nhập trước khi thao tác");
+    }
+    if (user.id() == null || (!user.id().equals(resourceUserId) && !user.roles().contains("ADMIN"))) {
+      throw new BusinessException(
+          ErrorCode.FORBIDDEN, "Không có quyền thao tác trên tài nguyên của người dùng khác");
+    }
+  }
 }

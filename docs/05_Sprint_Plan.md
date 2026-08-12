@@ -757,7 +757,7 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 **Mục tiêu:** Order Service với ownership check và Idempotency Key.
 
 **Tasks:**
-- `[ ]` `POST /api/orders` với Idempotency-Key header:
+- `[x]` `POST /api/orders` với Idempotency-Key header:
   ```java
   /**
    * Idempotency key chống duplicate order khi user click 2 lần.
@@ -771,7 +771,7 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
       // Nếu chưa → tạo order mới, cache response
   }
   ```
-- `[ ]` `GET /api/orders/{id}` với ownership check:
+- `[x]` `GET /api/orders/{id}` với ownership check:
   ```java
   public OrderResponse getOrder(Long orderId, CurrentUser currentUser) {
       Order order = orderRepository.findById(orderId).orElseThrow(...);
@@ -780,9 +780,9 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
       return mapToResponse(order);
   }
   ```
-- `[ ]` `GET /api/orders` — USER thấy đơn của mình, ADMIN thấy tất cả
-- `[ ]` `POST /api/orders/{id}/cancel` — Chỉ owner hoặc ADMIN, chỉ khi status = PENDING
-- `[ ]` Nâng cấp giao diện Checkout để tự động tạo UUID `Idempotency-Key` gửi lên header, tránh việc bấm nút đặt hàng nhiều lần dẫn đến trùng lặp đơn
+- `[x]` `GET /api/orders` — USER thấy đơn của mình, ADMIN thấy tất cả
+- `[x]` `POST /api/orders/{id}/cancel` — Chỉ owner hoặc ADMIN, chỉ khi status = PENDING
+- `[x]` Nâng cấp giao diện Checkout để tự động tạo UUID `Idempotency-Key` gửi lên header, tránh việc bấm nút đặt hàng nhiều lần dẫn đến trùng lặp đơn
 
 **Definition of Done:** Ownership test: User A không thể xem order của User B → 403. Giao diện Checkout gửi kèm Idempotency-Key và hiển thị chính xác kết quả đặt hàng, click 2 lần liên tiếp không bị trùng đơn hàng.
 
