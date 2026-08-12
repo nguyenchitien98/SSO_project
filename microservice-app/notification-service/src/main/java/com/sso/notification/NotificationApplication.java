@@ -15,8 +15,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  */
 @SpringBootApplication(exclude = {
     DataSourceAutoConfiguration.class,
-    FlywayAutoConfiguration.class,
-    KafkaAutoConfiguration.class
+    FlywayAutoConfiguration.class
 })
 @EnableDiscoveryClient
 public class NotificationApplication {

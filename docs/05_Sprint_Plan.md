@@ -22,9 +22,11 @@ Phase 5   — Observability & Production           (Sprint 22-25)
 ## Phase 0: Foundation & Infrastructure (Sprint 00-01)
 
 ### Sprint 00 — Project Setup & Infrastructure
+
 **Mục tiêu:** Khởi tạo repository, cấu hình toàn bộ infrastructure bằng Docker Compose.
 
 **Tasks:**
+
 - `[x] Tạo Maven multi-module project với modules: sso-server, monolith-app, microservice-app/*, common-contracts`
 - `[x] Tạo docker-compose.infra.yml bao gồm:`
   - PostgreSQL 16 (ports: 5432 — shared) với các databases cần thiết
@@ -42,9 +44,11 @@ Phase 5   — Observability & Production           (Sprint 22-25)
 ---
 
 ### Sprint 01 — Common Library & Database Schema
+
 **Mục tiêu:** Tạo các shared contracts và database schema đầy đủ.
 
 **Tasks:**
+
 - `[x] Tạo common-contracts module chứa:`
   - `ApiResponse<T>` record
   - `ErrorCode` enum
@@ -73,6 +77,7 @@ Phase 5   — Observability & Production           (Sprint 22-25)
 ## Phase 1: SSO Server (Sprint 02-05)
 
 ### Sprint 02 — SSO Server Bootstrap & OAuth2 Foundation
+
 **Mục tiêu:** SSO Server khởi động, expose JWKS endpoint, cấu hình OAuth2 clients.
 
 - `[x] Khởi tạo sso-server Spring Boot app với các dependencies chính`
@@ -93,6 +98,7 @@ Phase 5   — Observability & Production           (Sprint 22-25)
   - Check `enabled` và `locked` status thông qua `SsoUserDetails` bọc ngoài
 
 **API Contracts:**
+
 ```
 GET  /.well-known/openid-configuration  → OIDC metadata
 GET  /oauth2/jwks                        → Public keys (JWKS JSON)
@@ -106,9 +112,11 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ---
 
 ### Sprint 03 — User & Role Management API
+
 **Mục tiêu:** Hoàn thiện API quản trị User, Role, Permission cho SSO Server.
 
 **Tasks:**
+
 - `[x]` Implement `UserEntity.java` với các fields:
   ```java
   id (UUID), username, email, passwordHash, firstName, lastName,
@@ -135,9 +143,11 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ---
 
 ### Sprint 04 — Authentication Flow: Login, Logout, Password Change
+
 **Mục tiêu:** Hoàn thiện các luồng xác thực cốt lõi.
 
 **Tasks:**
+
 - `[x]` Implement `BruteForceProtectionService.java`:
   ```java
   // Dùng Redis: login:attempt:{username} → TTL 5 phút
@@ -158,9 +168,11 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ---
 
 ### Sprint 05 — SSO Cross-App Session (Single Sign-On)
+
 **Mục tiêu:** Chứng minh SSO thực sự hoạt động giữa Monolith và Microservice App.
 
 **Tasks:**
+
 - `[x]` Cấu hình SSO Server session persistence với Redis (không dùng in-memory)
   - Lý do: Trong môi trường nhiều SSO Server instances, session phải shared
 - `[x]` Test SSO flow đầy đủ:
@@ -179,9 +191,11 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ## Phase 2: Monolith App (Sprint 06-10)
 
 ### Sprint 06 — Monolith Bootstrap & OAuth2 Client Integration
+
 **Mục tiêu:** Monolith App khởi động, tích hợp SSO login, nhận được JWT.
 
 **Tasks:**
+
 - `[x]` Khởi tạo `monolith-app` Spring Boot với dependencies:
   - `spring-boot-starter-security`
   - `spring-boot-starter-oauth2-client` (OAuth2 Login)
@@ -213,11 +227,14 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ---
 
 ### Sprint 07 — Monolith Product & @PreAuthorize
+
 **Mục tiêu:** CRUD Product với phân quyền `@PreAuthorize` đầy đủ.
 
 **Tasks:**
+
 - `[x]` Implement `ProductEntity.java`, `ProductRepository.java`
 - `[x]` Implement `ProductService.java` với `@PreAuthorize` **ở Service Layer**:
+
   ```java
   @PreAuthorize("hasAuthority('PRODUCT_READ')")
   public Page<ProductResponse> getProducts(Pageable pageable) { ... }
@@ -232,6 +249,7 @@ GET  /oauth2/authorize                   → Authorization endpoint
   @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
   public void deleteProduct(Long id) { ... }
   ```
+
 - `[x]` Implement `ProductController.java` (không có `@PreAuthorize` ở Controller)
 - `[x]` Viết Unit Test cho từng security scenario:
   - USER gọi `createProduct` → `AccessDeniedException`
@@ -246,11 +264,14 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ---
 
 ### Sprint 08 — Monolith Order Service & Resource Ownership
+
 **Mục tiêu:** Implement ABAC (Resource Ownership) — user chỉ xem/hủy đơn hàng của chính mình.
 
 **Tasks:**
+
 - `[x]` Implement `OrderEntity.java`, `OrderItemEntity.java`, `OrderRepository.java`
 - `[x]` Implement `OrderSecurityEvaluator.java` (Spring Bean cho SpEL):
+
   ```java
   /**
    * Security evaluator để kiểm tra ownership của đơn hàng.
@@ -270,7 +291,9 @@ GET  /oauth2/authorize                   → Authorization endpoint
       }
   }
   ```
+
 - `[x]` Implement `OrderService.java`:
+
   ```java
   @PreAuthorize("hasAuthority('ORDER_CREATE')")
   public OrderResponse createOrder(CreateOrderRequest req) { ... }
@@ -283,6 +306,7 @@ GET  /oauth2/authorize                   → Authorization endpoint
   @PreAuthorize("@orderSecurity.isOwnerOrAdmin(authentication, #orderId)")
   public void cancelOrder(Long orderId) { ... }
   ```
+
 - `[x]` Implement `PaymentService.java` (Mock Sandbox):
   ```java
   @PreAuthorize("hasAuthority('PAYMENT_CREATE')")
@@ -297,9 +321,11 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ---
 
 ### Sprint 09 — Monolith Audit Log & Security Hardening
+
 **Mục tiêu:** Audit log tự động, bảo mật nâng cao cho Monolith.
 
 **Tasks:**
+
 - `[x]` Implement `@Auditable` annotation:
   ```java
   @Retention(RetentionPolicy.RUNTIME)
@@ -331,9 +357,11 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ---
 
 ### Sprint 10 — Monolith Complete Integration Test
+
 **Mục tiêu:** Integration test end-to-end cho toàn bộ Monolith Backend.
 
 **Tasks:**
+
 - `[x]` Setup H2 in-memory database (PostgreSQL mode) cho Integration Test (không cần Docker)
 - `[x]` Viết `MonolithCompleteIntegrationTest.java` với các scenarios:
   - Scenario 1 — Happy path: JWT hợp lệ → GET /products → POST /orders → GET /orders/{id} thành công
@@ -352,14 +380,17 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ## Phase 2.5: Monolith Frontend — React.js + Vite (Sprint 10.5)
 
 ### Sprint 10.5 — Monolith Frontend Bootstrap & OAuth2 PKCE Login
+
 **Mục tiêu:** Khởi tạo ứng dụng React.js SPA, implement luồng OAuth2 Authorization Code + PKCE để đăng nhập qua SSO Server.
 
 **Tại sao React.js (không Next.js)?**
+
 - Monolith là ứng dụng **Client-Side Rendered (SPA)** — không cần SSR vì Monolith Backend đã xử lý data
 - Học cách tự implement PKCE flow từ đầu (giá trị học tập cao hơn)
 - Vite cho hot reload nhanh, bundle nhỏ
 
 **Cơ chế SSO Login cho React SPA:**
+
 ```
 1. User bấm "Đăng nhập" → Frontend generate code_verifier + code_challenge (SHA-256)
 2. Redirect sang: http://sso-server:9000/oauth2/authorize
@@ -378,6 +409,7 @@ GET  /oauth2/authorize                   → Authorization endpoint
 ```
 
 **Cấu trúc project:**
+
 ```
 monolith-frontend/
 ├── src/
@@ -428,6 +460,7 @@ monolith-frontend/
 ```
 
 **Tasks:**
+
 - `[x]` Khởi tạo project: `npm create vite@latest monolith-frontend -- --template react-ts`
   - Cài dependencies: `react-router-dom`, `@types/node`
   - Cấu hình Vite proxy: `/api/**` → `http://localhost:8080`
@@ -487,15 +520,18 @@ monolith-frontend/
 ## Phase 2.6: Microservice Frontend — Next.js 15 + NextAuth.js (Sprint 10.6)
 
 ### Sprint 10.6 — Microservice Frontend Bootstrap & NextAuth SSO Integration
+
 **Mục tiêu:** Khởi tạo ứng dụng Next.js 15 (App Router, RSC), tích hợp NextAuth.js v5 để đăng nhập qua SSO Server tự động, xây dựng UI đầy đủ cho Microservice App.
 
 **Tại sao Next.js 15 (không React)?**
+
 - Microservice App phức tạp hơn — cần **Server-Side Rendering** cho SEO và performance
 - **React Server Components (RSC)** fetch data ở server → không lộ token ra browser
 - **NextAuth.js v5** xử lý toàn bộ OAuth2 flow + token rotation tự động
 - Phù hợp với production-grade app (không phải prototype)
 
 **Cơ chế SSO Login với NextAuth.js:**
+
 ```
 1. User vào /dashboard → middleware kiểm tra session → chưa có → redirect /login
 2. User bấm "Đăng nhập" → gọi signIn('sso-server') của NextAuth
@@ -512,6 +548,7 @@ monolith-frontend/
 ```
 
 **Cấu trúc project:**
+
 ```
 microservice-frontend/
 ├── src/
@@ -569,11 +606,13 @@ microservice-frontend/
 ```
 
 **Tasks:**
+
 - `[x]` Khởi tạo project:
   ```bash
   npx create-next-app@latest microservice-frontend \
     --typescript --app --src-dir --no-tailwind --import-alias "@/*"
   ```
+
   - Cài dependencies: `next-auth@beta`, `chart.js`, `react-chartjs-2`
 - `[x]` Cấu hình `.env.local` và `.env.example`:
   ```env
@@ -636,9 +675,11 @@ microservice-frontend/
 ## Phase 3: Microservice App (Sprint 11-17)
 
 ### Sprint 11 — API Gateway Bootstrap & JWT Validation
+
 **Mục tiêu:** API Gateway xác thực JWT từ JWKS của SSO Server, inject trusted headers.
 
 **Tasks:**
+
 - `[x]` Khởi tạo `api-gateway` Spring Cloud Gateway app
 - `[x]` Implement `StripClientHeadersFilter.java`:
   ```java
@@ -678,9 +719,11 @@ microservice-frontend/
 ---
 
 ### Sprint 12 — Centralized Config, Service Discovery & Microservice Skeleton
+
 **Mục tiêu:** Eureka Server + Config Server + skeleton cho 6 microservices, mỗi service đọc X-User headers.
 
 **Tasks:**
+
 - `[x]` Khởi tạo Spring Cloud Config Server (`:8888`) quản lý cấu hình tập trung
 - `[x]` Khởi tạo Eureka Server (`:8761`)
 - `[x]` Tạo skeleton cho 6 services (user, product, order, payment, notification, file-service):
@@ -713,17 +756,20 @@ microservice-frontend/
 ---
 
 ### Sprint 13 — User Service & Product Service
+
 **Mục tiêu:** Implement User Profile Service và Product Service với authorization đầy đủ.
 
 **Tasks:**
 
 **User Service (:8091)**
+
 - `[x]` `GET /api/users/me` — Trả về profile của current user
 - `[x]` `PUT /api/users/me` — Cập nhật profile (chỉ của chính mình)
 - `[x]` `GET /api/users/{id}` — ADMIN/SUPPORT only
 - `[x]` `PUT /api/users/{id}/status` — Enable/Disable, ADMIN only
 
 **Product Service (:8092)**
+
 - `[x]` `GET /api/products` — Public (không cần auth)
 - `[x]` `GET /api/products/{id}` — Public
 - `[x]` `POST /api/products` — `requirePermission(PRODUCT_CREATE)`
@@ -731,12 +777,14 @@ microservice-frontend/
 - `[x]` `DELETE /api/products/{id}` — `requireRole(ADMIN)` hoặc `requireRole(MANAGER)`
 
 **File Service (:8096) & MinIO Integration**
+
 - `[x]` Khởi động MinIO service ở docker-compose.infra.yml
 - `[x]` Implement API upload file: `POST /api/files/upload` (validate MIME type, size < 5MB)
 - `[x]` Cấu hình bucket policies và sinh Presigned URLs cho ảnh private
 - `[x]` Cung cấp public URLs cho avatars và product images
 
 **Authorization pattern:**
+
 ```java
 public ProductResponse createProduct(CreateProductRequest req, CurrentUser currentUser) {
     // Tường minh hơn @PreAuthorize — dev đọc code biết ngay cần quyền gì
@@ -754,9 +802,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ---
 
 ### Sprint 14 — Order Service & Resource Ownership
+
 **Mục tiêu:** Order Service với ownership check và Idempotency Key.
 
 **Tasks:**
+
 - `[x]` `POST /api/orders` với Idempotency-Key header:
   ```java
   /**
@@ -789,10 +839,13 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ---
 
 ### Sprint 15 — Payment Service & Service-to-Service Auth
+
 **Mục tiêu:** Payment Service với Client Credentials authentication từ Order Service.
 
 **Tasks:**
+
 - `[x]` Implement `OrderService → PaymentService` call với OAuth2 Client Credentials:
+
   ```java
   /**
    * Gọi Payment Service bằng Service Access Token (không phải User Token).
@@ -813,6 +866,7 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
       }
   }
   ```
+
 - `[x]` Payment Service chỉ cho phép request từ `order-service` client:
   ```java
   // Validate client_id trong token == "order-service"
@@ -826,15 +880,17 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ---
 
 ### Sprint 16 — Kafka Event-Driven & Outbox Pattern
+
 **Mục tiêu:** Kết nối các services qua Kafka, implement Outbox Pattern.
 
 **Tasks:**
-- `[ ]` Tạo Kafka topics:
+
+- `[x]` Tạo Kafka topics:
   - `order-created` (3 partitions)
   - `payment-completed` (3 partitions)
   - `payment-failed` (3 partitions)
   - `order-status-changed` (3 partitions)
-- `[ ]` Implement Transactional Outbox trong Order Service:
+- `[x]` Implement Transactional Outbox trong Order Service:
   ```java
   /**
    * Outbox Pattern: ghi event vào DB cùng transaction với order.
@@ -853,27 +909,30 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
       return mapToResponse(order);
   }
   ```
-- `[ ]` Implement `OutboxEventPublisher.java` (Scheduled Job):
+- `[x]` Implement `OutboxEventPublisher.java` (Scheduled Job):
   - Chạy mỗi 5 giây, đọc outbox events chưa gửi, publish lên Kafka
-- `[ ]` Implement `NotificationService` consume `order-created`:
+- `[x]` Implement `NotificationService` consume `order-created`:
   - Log "Gửi email xác nhận đơn hàng" (mock gửi email)
   - Implement Idempotent Consumer (check event_id đã xử lý chưa)
-- `[ ]` Xây dựng giao diện Centralized Reports Dashboard hiển thị các biểu đồ trực quan về doanh thu bán hàng, số lượng đơn hàng, và biểu đồ tài nguyên (CPU, Memory, Request Rate)
+- `[x]` Xây dựng giao diện Centralized Reports Dashboard hiển thị các biểu đồ trực quan về doanh thu bán hàng, số lượng đơn hàng, và biểu đồ tài nguyên (CPU, Memory, Request Rate)
 
 **Definition of Done:** Tạo order → outbox event → Kafka → Notification Service log email confirmation. Giao diện báo cáo và biểu đồ metrics hiển thị dữ liệu chính xác trên Next.js Dashboard.
 
 ---
 
 ### Sprint 17 — Resilience4j & Circuit Breaker
+
 **Mục tiêu:** Order Service không bị sập khi Payment Service down.
 
 **Tasks:**
+
 - `[ ]` Cài Resilience4j cho `PaymentServiceClient`:
   - Circuit Breaker: 50% lỗi trong 10s → OPEN, 30s sau thử HALF-OPEN
   - Retry: 3 lần, delay 500ms, exponential backoff
   - Timeout: 3 giây
   - Bulkhead: tối đa 10 concurrent calls tới Payment Service
 - `[ ]` Implement Fallback:
+
   ```java
   @CircuitBreaker(name = "paymentService", fallbackMethod = "paymentFallback")
   @Retry(name = "paymentService")
@@ -887,6 +946,7 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
       return CompletableFuture.completedFuture(PaymentResponse.queued());
   }
   ```
+
 - `[ ]` Test: Dừng Payment Service → Order Service trả về fallback response → Circuit Breaker OPEN
 - `[ ]` Khởi động lại Payment Service → Circuit Breaker chuyển HALF-OPEN → CLOSED
 - `[ ]` Xây dựng Fallback UI / Error Boundary thân thiện khi API Gateway báo lỗi timeout hoặc 503 Service Unavailable (khi Circuit Breaker ở trạng thái OPEN), hiển thị thông báo "Hệ thống đang bận, xin vui lòng thử lại sau"
@@ -898,9 +958,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ## Phase 4: Security Hardening & Testing (Sprint 18-21)
 
 ### Sprint 18 — Security Attack Scenarios Testing
+
 **Mục tiêu:** Tự tấn công hệ thống để verify tất cả security controls hoạt động.
 
 **Tasks:**
+
 - `[ ]` JWT Attack Tests:
   - `alg:none` attack → Gateway reject
   - Expired JWT → 401
@@ -927,9 +989,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ---
 
 ### Sprint 19 — Distributed Tracing & Correlation ID
+
 **Mục tiêu:** Trace được đường đi của request qua tất cả microservices.
 
 **Tasks:**
+
 - `[ ]` Setup OpenTelemetry Agent cho tất cả microservices
 - `[ ]` Cấu hình Jaeger hoặc Zipkin collector
 - `[ ]` Gateway generate `X-Correlation-Id` cho mỗi request
@@ -945,9 +1009,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ---
 
 ### Sprint 20 — Key Rotation
+
 **Mục tiêu:** Implement RSA key rotation an toàn mà không làm mất tính hợp lệ của tokens hiện có.
 
 **Tasks:**
+
 - `[ ]` Implement Key Rotation API (ADMIN only):
   - `POST /admin/keys/rotate` — Generate key pair mới (key-v2)
   - SSO tiếp tục publish cả key-v1 và key-v2 qua JWKS
@@ -961,9 +1027,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ---
 
 ### Sprint 21 — Complete Security Test Suite
+
 **Mục tiêu:** Viết full automated security test suite.
 
 **Tasks:**
+
 - `[ ]` Setup Testcontainers test environment: SSO + Gateway + User Service + Order Service
 - `[ ]` Viết SecurityTestSuite với các scenarios từ Sprint 18 (automated)
 - `[ ]` Viết E2E Test: Full user journey từ login đến checkout
@@ -977,9 +1045,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ## Phase 5: Observability & Production (Sprint 22-25)
 
 ### Sprint 22 — Prometheus & Grafana Dashboards
+
 **Mục tiêu:** Metrics cho tất cả services hiển thị trên Grafana.
 
 **Tasks:**
+
 - `[ ]` Configure `spring-boot-starter-actuator` + Micrometer cho mọi service
 - `[ ]` Prometheus scrape từ `/actuator/prometheus` của tất cả services
 - `[ ]` Tạo Grafana dashboards:
@@ -993,9 +1063,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ---
 
 ### Sprint 23 — Structured Logging & Log Aggregation
+
 **Mục tiêu:** Tất cả services log theo format JSON, có thể search theo correlationId.
 
 **Tasks:**
+
 - `[ ]` Cấu hình Logback JSON format cho tất cả services:
   ```json
   {
@@ -1016,9 +1088,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ---
 
 ### Sprint 24 — Docker Production Build, GitLab CI & Kubernetes
+
 **Mục tiêu:** Đóng gói toàn bộ hệ thống vào Docker images, chạy qua docker compose, cấu hình GitLab CI pipeline và deploy lên Kubernetes.
 
 **Tasks:**
+
 - `[ ]` Viết multi-stage `Dockerfile` cho mỗi service:
   - Stage 1: Maven build (JDK 21 image)
   - Stage 2: Runtime (JRE 21 slim image, ~150MB)
@@ -1039,9 +1113,11 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 ---
 
 ### Sprint 25 — Documentation & Interview Preparation
+
 **Mục tiêu:** Hoàn thiện tài liệu, interview guide, ADR cho toàn bộ dự án.
 
 **Tasks:**
+
 - `[ ]` Viết ADR (Architecture Decision Records) cho các quyết định quan trọng:
   - `ADR-001: Tại sao dùng Spring Authorization Server thay vì Keycloak`
   - `ADR-002: Tại sao Gateway validate JWT thay vì gọi Auth Service`
@@ -1060,16 +1136,16 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 
 ## Tóm Tắt Lộ Trình
 
-| Phase | Sprints | Framework | Mục Tiêu Chính |
-|---|---|---|---|
-| Phase 0 | 00-01 | — | Infrastructure, DB Schema, Common Library |
-| Phase 1 | 02-05 | Spring Authorization Server | SSO Server: OAuth2, OIDC, JWT, RBAC |
-| Phase 2 | 06-10 | Spring Boot + Spring Security | Monolith App: @PreAuthorize, ABAC, Audit Log |
-| **Phase 2.5** | **10.5** | **React.js 18 + Vite + TypeScript** | **Monolith Frontend: PKCE OAuth2, Products, Orders, Admin** |
-| **Phase 2.6** | **10.6** | **Next.js 15 + NextAuth.js v5** | **Microservice Frontend: RSC, SSO auto-login, 2FA, Reports** |
-| Phase 3 | 11-17 | Spring Cloud Gateway + Microservices | Microservice: Gateway, Services, Kafka, Resilience4j |
-| Phase 4 | 18-21 | — | Security Testing, Key Rotation, Distributed Tracing |
-| Phase 5 | 22-25 | Docker + GitLab CI + Kubernetes | Observability, CI/CD, Documentation |
+| Phase         | Sprints  | Framework                            | Mục Tiêu Chính                                               |
+| ------------- | -------- | ------------------------------------ | ------------------------------------------------------------ |
+| Phase 0       | 00-01    | —                                    | Infrastructure, DB Schema, Common Library                    |
+| Phase 1       | 02-05    | Spring Authorization Server          | SSO Server: OAuth2, OIDC, JWT, RBAC                          |
+| Phase 2       | 06-10    | Spring Boot + Spring Security        | Monolith App: @PreAuthorize, ABAC, Audit Log                 |
+| **Phase 2.5** | **10.5** | **React.js 18 + Vite + TypeScript**  | **Monolith Frontend: PKCE OAuth2, Products, Orders, Admin**  |
+| **Phase 2.6** | **10.6** | **Next.js 15 + NextAuth.js v5**      | **Microservice Frontend: RSC, SSO auto-login, 2FA, Reports** |
+| Phase 3       | 11-17    | Spring Cloud Gateway + Microservices | Microservice: Gateway, Services, Kafka, Resilience4j         |
+| Phase 4       | 18-21    | —                                    | Security Testing, Key Rotation, Distributed Tracing          |
+| Phase 5       | 22-25    | Docker + GitLab CI + Kubernetes      | Observability, CI/CD, Documentation                          |
 
 ---
 
@@ -1077,13 +1153,13 @@ public ProductResponse createProduct(CreateProductRequest req, CurrentUser curre
 
 ### Tại sao 2 Framework khác nhau?
 
-| Điểm | Monolith Frontend (React.js) | Microservice Frontend (Next.js) |
-|---|---|---|
-| **Rendering** | Client-Side Rendering (SPA) | Server-Side + RSC |
-| **OAuth2 Flow** | Tự implement PKCE (học sâu) | NextAuth.js tự động hóa |
-| **Token Storage** | `sessionStorage` (in-memory) | HTTP-only Cookie (NextAuth) |
-| **API Target** | Monolith `:8080` | API Gateway `:8090` |
-| **Mục đích học** | Hiểu OAuth2 raw flow | Hiểu production SSO pattern |
+| Điểm              | Monolith Frontend (React.js) | Microservice Frontend (Next.js) |
+| ----------------- | ---------------------------- | ------------------------------- |
+| **Rendering**     | Client-Side Rendering (SPA)  | Server-Side + RSC               |
+| **OAuth2 Flow**   | Tự implement PKCE (học sâu)  | NextAuth.js tự động hóa         |
+| **Token Storage** | `sessionStorage` (in-memory) | HTTP-only Cookie (NextAuth)     |
+| **API Target**    | Monolith `:8080`             | API Gateway `:8090`             |
+| **Mục đích học**  | Hiểu OAuth2 raw flow         | Hiểu production SSO pattern     |
 
 ### Luồng SSO Login tổng quát
 

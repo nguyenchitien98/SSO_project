@@ -66,6 +66,22 @@ public class OrderController {
     return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Đặt hàng thành công", order));
   }
 
+  @GetMapping("/reports")
+  public ResponseEntity<ApiResponse<?>> getReports(HttpServletRequest request) {
+    CurrentUser currentUser = userResolver.resolve(request);
+    log.info("API GET /api/orders/reports - User: {}", currentUser != null ? currentUser.email() : "GUEST");
+
+    if (currentUser == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(
+          com.sso.common.exception.ErrorCode.UNAUTHORIZED, "Chưa xác thực"));
+    }
+
+    authService.requireRole(currentUser, "ADMIN");
+
+    java.util.Map<String, Object> reportData = orderService.getReportData();
+    return ResponseEntity.ok(ApiResponse.success("Lấy báo cáo doanh thu thành công", reportData));
+  }
+
   /**
    * Lấy danh sách đơn hàng phân trang (Người dùng xem đơn của họ, ADMIN/MANAGER/SUPPORT xem tất cả).
    *

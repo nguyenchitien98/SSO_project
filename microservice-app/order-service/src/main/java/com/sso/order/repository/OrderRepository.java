@@ -20,4 +20,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   Page<Order> findAllByUserId(UUID userId, Pageable pageable);
 
   Optional<Order> findByOrderCode(String orderCode);
+
+  @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = 'PAID'")
+  java.math.BigDecimal sumTotalRevenue();
 }

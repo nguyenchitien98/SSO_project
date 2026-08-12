@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentService {
 
   private final PaymentRepository paymentRepository;
+  private final com.sso.payment.repository.OutboxEventRepository outboxRepository;
+  private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
   /**
    * Tạo giao dịch thanh toán mới ở trạng thái PENDING, giả lập bất đồng bộ chuyển COMPLETED sau 2 giây.
@@ -105,7 +107,35 @@ public class PaymentService {
   public void updatePaymentStatus(Long paymentId, String status) {
     paymentRepository.findById(paymentId).ifPresent(payment -> {
       payment.setStatus(status);
-      paymentRepository.save(payment);
+      Payment savedPayment = paymentRepository.save(payment);
+
+      if ("COMPLETED".equals(status)) {
+        try {
+          com.sso.common.event.PaymentCompletedEvent eventPayload = new com.sso.common.event.PaymentCompletedEvent(
+              UUID.randomUUID(),
+              savedPayment.getId(),
+              savedPayment.getOrderId(),
+              savedPayment.getUserId(),
+              savedPayment.getAmount(),
+              status,
+              savedPayment.getTransactionRef(),
+              Instant.now()
+          );
+
+          com.sso.payment.entity.OutboxEvent outboxEvent = com.sso.payment.entity.OutboxEvent.builder()
+              .eventType("PAYMENT_COMPLETED")
+              .aggregateId(savedPayment.getId().toString())
+              .payload(objectMapper.writeValueAsString(eventPayload))
+              .status("PENDING")
+              .createdAt(Instant.now())
+              .build();
+
+          outboxRepository.save(outboxEvent);
+          log.info("[Outbox] Đã lưu sự kiện PAYMENT_COMPLETED cho giao dịch ID: {}", savedPayment.getId());
+        } catch (Exception e) {
+          log.error("[Outbox] Lỗi khi tạo sự kiện PAYMENT_COMPLETED outbox: ", e);
+        }
+      }
     });
   }
 }
